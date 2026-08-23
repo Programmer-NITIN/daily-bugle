@@ -58,6 +58,49 @@ body::before {
 
 ::selection { background: var(--red); color: var(--paper); }
 
+/* ============================================================
+   CUSTOM THEMED SCROLLBARS (MAIN PAGE & HEALING LAB CONSOLE)
+   ============================================================ */
+
+/* Firefox global scrollbar */
+html {
+  scrollbar-width: auto;
+  scrollbar-color: var(--red) var(--paper-dark);
+}
+
+/* Webkit Global / Main Page Scrollbar */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--paper-dark);
+  border-left: 3px solid var(--ink);
+  background-image: radial-gradient(circle, rgba(19, 16, 21, 0.15) 1px, transparent 1px);
+  background-size: 6px 6px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--red);
+  border: 3px solid var(--ink);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.35);
+  border-radius: 0;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--red-dark);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--gold);
+}
+
+::-webkit-scrollbar-corner {
+  background: var(--paper-dark);
+  border: 3px solid var(--ink);
+}
+
 code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 
 /* ============================================================
@@ -612,6 +655,34 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
   line-height: 1.55; height: 340px; overflow-y: auto;
   padding: 0.8rem; background: #000; border: 2px solid #333;
   margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.15rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--gold) #0d0a10;
+}
+
+.console::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.console::-webkit-scrollbar-track {
+  background: #0d0a10;
+  border-left: 2px solid #333;
+}
+
+.console::-webkit-scrollbar-thumb {
+  background: var(--gold);
+  border: 2px solid var(--ink);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.5);
+  border-radius: 0;
+}
+
+.console::-webkit-scrollbar-thumb:hover {
+  background: #ffe066;
+  box-shadow: 0 0 10px rgba(242, 193, 78, 0.8);
+}
+
+.console::-webkit-scrollbar-thumb:active {
+  background: var(--red);
 }
 .console__idle { color: #666; font-style: italic; }
 .console .l--cmd { color: var(--gold); font-weight: 700; }
