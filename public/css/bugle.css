@@ -775,30 +775,86 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 .colophon p { font-size: 0.85rem; line-height: 1.45; color: #444; }
 
 /* ============================================================
-   STARK UPGRADE BUTTON & IRON MAN THEME OVERRIDES
+   STARK UPGRADE FINALE CTA & IRON MAN THEME OVERRIDES
    ============================================================ */
-.header__stark-btn {
-  font-family: var(--font-comic);
-  font-size: 0.92rem;
-  letter-spacing: 0.08em;
-  color: var(--paper);
-  background: var(--red);
-  border: 2px solid var(--ink);
-  padding: 4px 12px;
-  border-radius: 4px;
-  box-shadow: 3px 3px 0 var(--gold);
-  cursor: pointer;
-  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+.finale {
+  position: relative;
+  z-index: 2;
+  width: 100%;
+  margin: 5rem 0 3rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+.finale__hint {
+  font-family: var(--font-hand);
+  font-size: clamp(1rem, 1.8vw, 1.35rem);
+  color: var(--gold);
+  opacity: 0.9;
+}
+.finale__btn {
+  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 14px;
+  font-family: var(--font-comic);
+  font-size: clamp(1.35rem, 3.4vw, 2.3rem);
+  letter-spacing: 0.05em;
+  color: #14141a;
+  background: var(--gold);
+  border: 3px solid var(--ink);
+  border-radius: 999px;
+  padding: 18px 40px;
+  box-shadow: 6px 6px 0 var(--red);
+  cursor: pointer;
+  will-change: transform;
+  animation: finalePulse 2.2s ease-in-out infinite;
+  transition: background 0.2s ease, box-shadow 0.2s ease, transform 0.2s ease;
 }
-.header__stark-btn:hover {
-  transform: translate(-1px, -1px);
-  box-shadow: 4px 4px 0 var(--gold);
-  background: var(--red-dark);
+.finale__btn strong { color: var(--red); }
+.finale__btn:hover {
+  background: #ffd76b;
+  box-shadow: 9px 11px 0 var(--red), 0 0 42px 8px rgba(242, 193, 78, 0.45);
+  transform: translateY(-2px);
+}
+.finale__core {
+  flex-shrink: 0;
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: radial-gradient(circle, #fff 0%, #7ed8ff 45%, rgba(126,216,255,0.15) 75%);
+  box-shadow: 0 0 12px 4px rgba(126, 216, 255, 0.85);
+  animation: corepulse 1.6s ease-in-out infinite;
+}
+.finale__sub {
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.8rem;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink);
+  opacity: 0.75;
+}
+.finale__sub kbd {
+  font-family: var(--font-comic);
+  background: var(--red);
+  color: #fff;
+  padding: 1px 8px;
+  border-radius: 3px;
+}
+@keyframes finalePulse {
+  0%, 100% { box-shadow: 6px 6px 0 var(--red), 0 0 0 0 rgba(242, 193, 78, 0.5); }
+  50% { box-shadow: 6px 6px 0 var(--red), 0 0 30px 9px rgba(242, 193, 78, 0.22); }
+}
+@keyframes corepulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.25); }
 }
 
+/* ============================================================
+   STARK (IRON MAN) MODE ABSOLUTE OVERRIDES
+   ============================================================ */
 body.iron {
   --red: #e62429;
   --red-dark: #b1121b;
@@ -808,36 +864,39 @@ body.iron {
   --paper: #16131a;
   --paper-dark: #201a26;
   --paper-deep: #2a2333;
-  background: var(--paper);
-  color: #f2ead7;
+  background: var(--paper) !important;
+  color: #f2ead7 !important;
+}
+
+/* HIDE ALL SPIDERS IN STARK MODE */
+body.iron .scrollspider,
+body.iron #heroCanvas {
+  display: none !important;
+}
+
+/* STARK GOLD CURSOR RING */
+body.iron .cursor__ring {
+  border-color: var(--gold) !important;
+  box-shadow: 0 0 12px var(--gold);
+}
+body.iron .cursor__dot {
+  background: var(--gold) !important;
+}
+body.iron .cursor.is-hover .cursor__ring {
+  background: rgba(242, 193, 78, 0.18) !important;
+  border-color: var(--gold) !important;
 }
 
 body.iron .header {
   background: rgba(22, 19, 26, 0.96);
   border-bottom-color: var(--gold);
 }
-body.iron .header__logo {
-  color: #f2ead7;
-}
-body.iron .header__logo-mark {
-  color: var(--gold);
-}
-body.iron .header__nav a {
-  color: #f2ead7;
-}
-body.iron .header__stark-btn {
-  background: var(--gold);
-  color: var(--ink);
-  border-color: var(--ink);
-  box-shadow: 3px 3px 0 var(--red);
-}
-body.iron .header__stark-btn:hover {
-  background: #ffe082;
-  box-shadow: 4px 4px 0 var(--red);
-}
+body.iron .header__logo { color: #f2ead7; }
+body.iron .header__logo-mark { color: var(--gold); }
+body.iron .header__nav a { color: #f2ead7; }
 
 body.iron .hero__word--fill {
-  background-image: url("/assets/iron-armors.jpg");
+  background-image: url("/assets/iron-comic.jpg");
   -webkit-text-stroke: 2.5px var(--gold);
   filter: drop-shadow(6px 6px 0 var(--red-dark));
 }
@@ -857,4 +916,8 @@ body.iron .card {
   box-shadow: 5px 5px 0 var(--ink);
   color: #f2ead7;
 }
+body.iron .finale__sub {
+  color: #f2ead7;
+}
+
 

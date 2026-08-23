@@ -820,50 +820,81 @@ document.addEventListener('DOMContentLoaded', () => {
   initStarkUpgrade();
 });
 
+const IMG_SWAPS = [
+  ['.origin__scene[data-scene="0"] img', "/assets/iron-retro.jpg"],
+  ['.origin__scene[data-scene="1"] img', "/assets/iron-blueprint.jpg"],
+  ['.origin__scene[data-scene="2"] img', "/assets/iron-armors.jpg"],
+  ['.origin__scene[data-scene="3"] img', "/assets/iron-fly.jpg"],
+];
+
+const TEXT_SWAPS = [
+  [".header__logo-mark", "⚡"],
+  [".hero__kicker", "<span>MARK #85</span> · STARK AUTONOMOUS SCRAPER PROTOCOL · EST. 2026"],
+  [".hero__sub", "JARVIS-powered silent DOM break detection, automated payload scoring, and suit-grade selector re-composition — built out of pure code."],
+  ['.origin__scene[data-scene="0"] .origin__caption p', "An ordinary scraper engine built out of garage scraps..."],
+  ['.origin__scene[data-scene="1"] .origin__caption p', "...started drawing autonomous JARVIS blueprints."],
+  ['.origin__scene[data-scene="2"] .origin__caption p', "Built collector after collector. Mark after Mark."],
+  ['.origin__scene[data-scene="3"] .origin__caption p', "Now it heals autonomously. JARVIS handles the broken selectors."],
+  [".finale__label", 'RETURN TO THE <strong>SPIDER-VERSE</strong> 🕷'],
+  [".finale__hint", "— had enough of the suit? —"],
+];
+
+const spideyCache = new Map();
+
 function initStarkUpgrade() {
-  const btn = $('#btnStarkUpgrade');
+  const themeBtn = document.getElementById("themeToggle");
 
-  function applyTheme(iron) {
-    document.body.classList.toggle('iron', iron);
-    if (btn) {
-      btn.innerHTML = iron ? '🕷 SPIDEY MODE' : '⚡ STARK UPGRADE';
-    }
-    try { localStorage.setItem('theme', iron ? 'iron' : 'spidey'); } catch (e) {}
+  function applyTheme(iron, shouldScroll = true) {
+    document.body.classList.toggle("iron", iron);
 
-    // MOVE TO TOP IMMEDIATELY WHEN ACTIVATED / TOGGLED
-    if (window.lenisInstance) {
-      window.lenisInstance.scrollTo(0, { duration: 1.2 });
-    } else {
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+    IMG_SWAPS.forEach(([sel, ironSrc]) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      if (!spideyCache.has(sel)) spideyCache.set(sel, el.getAttribute("src"));
+      el.setAttribute("src", iron ? ironSrc : spideyCache.get(sel));
+    });
+
+    TEXT_SWAPS.forEach(([sel, ironHTML]) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      if (!spideyCache.has(sel)) spideyCache.set(sel, el.innerHTML);
+      el.innerHTML = iron ? ironHTML : spideyCache.get(sel);
+    });
+
+    if (shouldScroll) {
+      if (window.lenisInstance) {
+        window.lenisInstance.scrollTo(0, { duration: 1.2 });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     }
+
+    try { localStorage.setItem("theme", iron ? "iron" : "spidey"); } catch (e) {}
 
     if (typeof gsap !== 'undefined') {
-      gsap.fromTo('.hero__title',
-        { scale: 0.95, filter: 'brightness(1.5)' },
-        { scale: 1, filter: 'brightness(1)', duration: 0.7, ease: 'elastic.out(1, 0.4)' }
-      );
+      gsap.fromTo("main", { scale: 0.985 }, { scale: 1, duration: 0.5, ease: "elastic.out(1, 0.4)", clearProps: "transform" });
     }
   }
 
-  if (btn) {
-    btn.addEventListener('click', () => {
-      const isIron = document.body.classList.contains('iron');
-      applyTheme(!isIron);
-    });
+  function toggleTheme() {
+    applyTheme(!document.body.classList.contains("iron"), true);
   }
 
-  window.addEventListener('keydown', (e) => {
+  if (themeBtn) {
+    themeBtn.addEventListener("click", toggleTheme);
+  }
+
+  window.addEventListener("keydown", (e) => {
     const k = e.key.toLowerCase();
     if ((k !== '/' && k !== 'i') || e.metaKey || e.ctrlKey || e.altKey) return;
     if (/input|textarea|select/i.test(document.activeElement?.tagName || '')) return;
     e.preventDefault();
-    applyTheme(!document.body.classList.contains('iron'));
+    toggleTheme();
   });
 
   try {
-    if (localStorage.getItem('theme') === 'iron') {
-      document.body.classList.add('iron');
-      if (btn) btn.innerHTML = '🕷 SPIDEY MODE';
+    if (localStorage.getItem("theme") === "iron") {
+      applyTheme(true, false);
     }
   } catch (e) {}
 }
