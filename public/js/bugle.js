@@ -1,56 +1,25 @@
 /**
- * @file Front-page client.
- *
- * Plain ES modules, no framework, no build step: `npm start` and it runs. The
- * server hands over the entire front page in one request, so rendering is a pure
- * function of that payload. The only stateful part is the heal stream, which
- * arrives over Server-Sent Events and is appended line by line.
+ * @file Front-page client with GSAP, ScrollTrigger, Lenis smooth scroll, and self-healing stream logic.
  */
 
-/**
- * The whole front-page payload. Deliberately loose — the server owns the shape — but
- * the three arrays are typed as record arrays so every `.map((t) => …)` callback below
- * infers its parameter instead of tripping `noImplicitAny`.
- *
- * @type {{targets: Record<string, any>[], stories: Record<string, any>[], events: Record<string, any>[], fleet: Record<string, any>, lead: Record<string, any> | null, tallies: Record<string, number>, config: Record<string, any>, edition: Record<string, any>, seeded: boolean}}
- */
 let state = /** @type {any} */ (null);
-/** @type {string} */
 let activeDesk = 'all';
 
 const $ = (/** @type {string} */ sel) => /** @type {HTMLElement} */ (document.querySelector(sel));
 
-/**
- * Escape text for interpolation into HTML.
- *
- * @param {unknown} value
- * @returns {string}
- */
 const esc = (value) =>
   String(value ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c] ?? c));
 
-/**
- * Format an ISO timestamp as newsprint date-time.
- *
- * @param {string | null} iso
- * @returns {string}
- */
 function when(iso) {
   if (!iso) return '—';
   const d = new Date(iso);
   return d.toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
 }
 
-/**
- * Colour class for a 0..100 health score.
- *
- * @param {number} health
- * @returns {string}
- */
 const healthClass = (health) => (health >= 85 ? '' : health >= 40 ? 'is-warn' : 'is-bad');
 
 /* ------------------------------------------------------------------
-   Boot
+   Boot & Data Fetching
    ------------------------------------------------------------------ */
 
 const PRESS_LINES = [
@@ -60,40 +29,30 @@ const PRESS_LINES = [
   'setting type on the front page',
 ];
 
-/** Roll the preloader while the first fetch is in flight. */
 async function boot() {
   const bar = $('#pressBar');
   const status = $('#pressStatus');
   let pct = 0;
   const timer = setInterval(() => {
     pct = Math.min(92, pct + 7);
-    bar.style.width = `${pct}%`;
-    status.textContent = PRESS_LINES[Math.min(PRESS_LINES.length - 1, Math.floor(pct / 25))];
+    if (bar) bar.style.width = `${pct}%`;
+    if (status) status.textContent = PRESS_LINES[Math.min(PRESS_LINES.length - 1, Math.floor(pct / 25))];
   }, 90);
 
   try {
     await refresh();
+    initAnimations();
   } finally {
     clearInterval(timer);
-    bar.style.width = '100%';
-    status.textContent = 'edition ready';
-    setTimeout(() => $('#press').classList.add('is-done'), 380);
+    if (bar) bar.style.width = '100%';
+    if (status) status.textContent = 'edition ready';
+    setTimeout(() => $('#press')?.classList.add('is-done'), 380);
   }
 }
 
-/**
- * Fetch JSON and fail loudly on a non-2xx. Without this a 404 lands as
- * `undefined` deep inside a render function and surfaces as an opaque
- * "cannot read properties of undefined" — useless mid-demo.
- *
- * @param {string} url
- * @param {RequestInit} [init]
- * @returns {Promise<any>}
- */
 async function fetchJson(url, init) {
   const res = await fetch(url, init);
   const text = await res.text();
-  /** @type {any} */
   let body;
   try {
     body = JSON.parse(text);
@@ -104,11 +63,6 @@ async function fetchJson(url, init) {
   return body;
 }
 
-/**
- * Pull the front page and render everything.
- *
- * @returns {Promise<void>}
- */
 async function refresh() {
   state = await fetchJson('/api/front-page');
   renderMasthead();
@@ -123,27 +77,35 @@ async function refresh() {
 }
 
 /* ------------------------------------------------------------------
-   Render
+   Render Functions
    ------------------------------------------------------------------ */
 
 function renderMasthead() {
   const { edition, config } = state;
-  $('#edition').textContent = `VOL. ${edition.volume} · NO. ${edition.issue}`;
-  $('#pressDate').textContent = new Date(edition.date)
-    .toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
-    .toUpperCase();
+  const edEl = $('#edition');
+  if (edEl) edEl.textContent = `VOL. ${edition.volume} · NO. ${edition.issue}`;
+  const dateEl = $('#pressDate');
+  if (dateEl) {
+    dateEl.textContent = new Date(edition.date)
+      .toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })
+      .toUpperCase();
+  }
   const badge = $('#modeBadge');
-  badge.textContent = config.mode === 'live' ? 'LIVE COLLECTORS' : 'FIXTURE MODE';
-  badge.classList.toggle('is-live', config.mode === 'live');
-  badge.title =
-    config.mode === 'live'
-      ? `Triggering real collectors against ${config.apiBase}`
-      : 'Running from committed snapshots — clone the repo and it just works, no credentials.';
+  if (badge) {
+    badge.textContent = config.mode === 'live' ? 'LIVE COLLECTORS' : 'FIXTURE MODE';
+    badge.classList.toggle('is-live', config.mode === 'live');
+    badge.title =
+      config.mode === 'live'
+        ? `Triggering real collectors against ${config.apiBase}`
+        : 'Running from committed snapshots — clone the repo and it just works, no credentials.';
+  }
 }
 
 function renderStrip() {
   const { fleet, tallies, edition } = state;
-  $('#strip').innerHTML = [
+  const strip = $('#strip');
+  if (!strip) return;
+  strip.innerHTML = [
     ['COLLECTORS IN PRINT', `${fleet.healthy}/${fleet.total}`, fleet.healthy === fleet.total ? 'stat--good' : 'stat--hot'],
     ['FLEET HEALTH', `${fleet.health}`, fleet.health >= 85 ? 'stat--good' : 'stat--hot'],
     ['RECORDS ON FILE', `${fleet.totalRecords}`, ''],
@@ -157,39 +119,43 @@ function renderStrip() {
 }
 
 function renderLead() {
-  const lead = /** @type {Record<string, any>} */ (state.lead);
+  const lead = state.lead;
   if (!lead) {
-    $('#leadHead').textContent = 'NO STORIES ON THE WIRE';
-    $('#leadBody').textContent = 'Run `npm run seed` then reload.';
+    if ($('#leadHead')) $('#leadHead').textContent = 'NO STORIES ON THE WIRE';
+    if ($('#leadBody')) $('#leadBody').textContent = 'Run `npm run seed` then reload.';
     return;
   }
-  $('#leadHead').textContent = `${lead.targetName} ${lead.version} — ${lead.desk.replace(' desk', '')}`;
-  $('#leadBody').textContent = lead.text;
-  $('#leadByline').innerHTML = [
-    `<b>${esc(lead.desk)}</b>`,
-    `NEWSWORTHINESS ${lead.score}/100`,
-    `${esc(lead.category)}`,
-    `RELEASED ${esc(lead.releasedAt)}`,
-    ...lead.tags.map((/** @type {string} */ t) => `<span>${esc(t)}</span>`),
-  ].join('');
+  if ($('#leadHead')) $('#leadHead').textContent = `${lead.targetName} ${lead.version} — ${lead.desk.replace(' desk', '')}`;
+  if ($('#leadBody')) $('#leadBody').textContent = lead.text;
+  if ($('#leadByline')) {
+    $('#leadByline').innerHTML = [
+      `<b>${esc(lead.desk)}</b>`,
+      `NEWSWORTHINESS ${lead.score}/100`,
+      `${esc(lead.category)}`,
+      `RELEASED ${esc(lead.releasedAt)}`,
+      ...lead.tags.map((t) => `<span>${esc(t)}</span>`),
+    ].join('');
+  }
 }
 
 function renderSense() {
   const { fleet, targets } = state;
   const dash = 327;
   const fill = /** @type {SVGCircleElement} */ (document.querySelector('#senseFill'));
-  fill.style.strokeDashoffset = String(dash - (dash * fleet.health) / 100);
-  fill.style.stroke = fleet.health >= 85 ? 'var(--green)' : fleet.health >= 40 ? 'var(--gold)' : 'var(--red)';
-  $('#fleetHealth').textContent = String(fleet.health);
+  if (fill) {
+    fill.style.strokeDashoffset = String(dash - (dash * fleet.health) / 100);
+    fill.style.stroke = fleet.health >= 85 ? 'var(--green)' : fleet.health >= 40 ? 'var(--gold)' : 'var(--red)';
+  }
+  if ($('#fleetHealth')) $('#fleetHealth').textContent = String(fleet.health);
 
-  // Show the four signals of the weakest collector — the one worth looking at.
   const worst = [...targets].sort((a, b) => a.health - b.health)[0];
-  $('#senseLines').innerHTML = (worst?.signals ?? [])
-    .map(
-      (/** @type {Record<string, any>} */ s) =>
-        `<li title="${esc(s.detail)}"><span>${esc(s.label)}</span><b>${Math.round(s.score * 100)}%</b></li>`
-    )
-    .join('') + `<li><span>WEAKEST COLLECTOR</span><b>${esc(worst?.name ?? '—')}</b></li>`;
+  if ($('#senseLines')) {
+    $('#senseLines').innerHTML = (worst?.signals ?? [])
+      .map(
+        (s) => `<li title="${esc(s.detail)}"><span>${esc(s.label)}</span><b>${Math.round(s.score * 100)}%</b></li>`
+      )
+      .join('') + `<li><span>WEAKEST COLLECTOR</span><b>${esc(worst?.name ?? '—')}</b></li>`;
+  }
 }
 
 function renderTicker() {
@@ -200,14 +166,16 @@ function renderTicker() {
   items.unshift(
     `<span class="hot"><b>SELF-HEALING SCRAPERS</b> · ${state.fleet.healEvents} autonomous repairs logged</span>`
   );
-  $('#tickerRail').innerHTML = items.join('<span>◆</span>');
+  if ($('#tickerRail')) $('#tickerRail').innerHTML = items.join('<span>◆</span>');
 }
 
 function renderFleet() {
-  $('#fleetGrid').innerHTML = state.targets
+  const fleetGrid = $('#fleetGrid');
+  if (!fleetGrid) return;
+  fleetGrid.innerHTML = state.targets
     .map((t) => {
       const bars = t.trend
-        .map((/** @type {Record<string, any>} */ p) => `<i class="${healthClass(p.health)}" style="height:${Math.max(8, p.health)}%" title="${esc(when(p.at))} · ${p.health}"></i>`)
+        .map((p) => `<i class="${healthClass(p.health)}" style="height:${Math.max(8, p.health)}%" title="${esc(when(p.at))} · ${p.health}"></i>`)
         .join('');
       return `
       <article class="card ${t.status === 'ok' ? '' : 'card--bad'}">
@@ -233,8 +201,10 @@ function renderFleet() {
 }
 
 function renderStories() {
+  const storyCols = $('#storyCols');
+  if (!storyCols) return;
   const list = activeDesk === 'all' ? state.stories : state.stories.filter((s) => s.desk === activeDesk);
-  $('#storyCols').innerHTML =
+  storyCols.innerHTML =
     list
       .map(
         (s) => `
@@ -246,7 +216,7 @@ function renderStories() {
           <span class="story__score">${s.score}</span>
           <span>${esc(s.type)}</span>
           <span>${esc(s.releasedAt)}</span>
-          ${s.tags.map((/** @type {string} */ t) => `<span class="story__tag">${esc(t)}</span>`).join('')}
+          ${s.tags.map((t) => `<span class="story__tag">${esc(t)}</span>`).join('')}
         </div>
       </article>`
       )
@@ -254,7 +224,8 @@ function renderStories() {
 }
 
 function renderCanon() {
-  /** @type {Record<string, string>} */
+  const canonList = $('#canonList');
+  if (!canonList) return;
   const labels = {
     break: 'LAYOUT CHANGED',
     detect: 'SPIDER-SENSE',
@@ -262,7 +233,7 @@ function renderCanon() {
     heal_done: 'HEAL COMPLETE',
     recovered: 'BACK IN PRINT',
   };
-  $('#canonList').innerHTML =
+  canonList.innerHTML =
     state.events
       .map(
         (e) => `
@@ -280,11 +251,12 @@ function renderCanon() {
 }
 
 /* ------------------------------------------------------------------
-   The Healing Lab
+   The Healing Lab Controls
    ------------------------------------------------------------------ */
 
 function renderLabOptions() {
   const select = /** @type {HTMLSelectElement} */ ($('#labTarget'));
+  if (!select) return;
   const keep = select.value;
   select.innerHTML = state.targets
     .map((t) => `<option value="${esc(t.id)}">${esc(t.name)} — health ${t.health}${t.broken ? ' ⚠ broken' : ''}</option>`)
@@ -293,9 +265,10 @@ function renderLabOptions() {
   syncLab();
 }
 
-/** Reflect the selected target's live numbers into the meters and hint. */
 function syncLab() {
-  const id = /** @type {HTMLSelectElement} */ ($('#labTarget')).value;
+  const targetSelect = /** @type {HTMLSelectElement} */ ($('#labTarget'));
+  if (!targetSelect) return;
+  const id = targetSelect.value;
   const t = state.targets.find((x) => x.id === id);
   if (!t) return;
 
@@ -306,40 +279,36 @@ function syncLab() {
   setMeter('#meterFields', '#meterFieldsVal', fieldPct, `${t.expectedFields.length - t.missingFields.length}/${t.expectedFields.length}`);
 
   const hint = $('#labHint');
-  hint.classList.remove('is-bad', 'is-good');
-  if (t.broken) {
-    hint.classList.add('is-bad');
-    hint.innerHTML = `<b>${esc(t.name)} is broken (${esc(t.broken.mode)}).</b> ${esc(t.broken.description)}. Note the scraper did not throw — it returned ${t.recordCount} records and no error.`;
-  } else if (t.status !== 'ok') {
-    hint.classList.add('is-bad');
-    hint.textContent = t.headline;
-  } else {
-    hint.classList.add('is-good');
-    hint.innerHTML = `<b>${esc(t.name)} is in print.</b> ${t.recordCount} records, every expected field populated. ${esc(t.why)}`;
+  if (hint) {
+    hint.classList.remove('is-bad', 'is-good');
+    if (t.broken) {
+      hint.classList.add('is-bad');
+      hint.innerHTML = `<b>${esc(t.name)} is broken (${esc(t.broken.mode)}).</b> ${esc(t.broken.description)}. Note the scraper did not throw — it returned ${t.recordCount} records and no error.`;
+    } else if (t.status !== 'ok') {
+      hint.classList.add('is-bad');
+      hint.textContent = t.headline;
+    } else {
+      hint.classList.add('is-good');
+      hint.innerHTML = `<b>${esc(t.name)} is in print.</b> ${t.recordCount} records, every expected field populated. ${esc(t.why)}`;
+    }
   }
-  /** @type {HTMLButtonElement} */ ($('#btnHeal')).disabled = t.status === 'ok';
+  const btnHeal = /** @type {HTMLButtonElement} */ ($('#btnHeal'));
+  if (btnHeal) btnHeal.disabled = t.status === 'ok';
 }
 
-/**
- * @param {string} barSel
- * @param {string} valSel
- * @param {number} pct
- * @param {string} label
- */
 function setMeter(barSel, valSel, pct, label) {
   const bar = $(barSel);
-  bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
-  bar.className = healthClass(pct);
-  $(valSel).textContent = label;
+  if (bar) {
+    bar.style.width = `${Math.max(0, Math.min(100, pct))}%`;
+    bar.className = healthClass(pct);
+  }
+  const val = $(valSel);
+  if (val) val.textContent = label;
 }
 
-/**
- * Append a line to the console, classified for colour.
- *
- * @param {string} line
- */
 function push(line) {
   const box = $('#console');
+  if (!box) return;
   box.querySelector('.console__idle')?.remove();
   const el = document.createElement('div');
   el.className = 'l';
@@ -354,24 +323,25 @@ function push(line) {
   box.scrollTop = box.scrollHeight;
 }
 
-/** @param {string} text */
 function clearConsole(text) {
-  $('#console').innerHTML = '';
+  const box = $('#console');
+  if (!box) return;
+  box.innerHTML = '';
   if (text) push(text);
 }
 
-/** @type {number | null} */
 let tick = null;
 
-/** @param {boolean} running */
 function setBusy(running, label = 'idle') {
-  $('#consoleState').textContent = label;
-  /** @type {HTMLButtonElement} */ ($('#btnBreak')).disabled = running;
-  /** @type {HTMLButtonElement} */ ($('#btnHeal')).disabled = running;
+  if ($('#consoleState')) $('#consoleState').textContent = label;
+  const btnBreak = /** @type {HTMLButtonElement} */ ($('#btnBreak'));
+  const btnHeal = /** @type {HTMLButtonElement} */ ($('#btnHeal'));
+  if (btnBreak) btnBreak.disabled = running;
+  if (btnHeal) btnHeal.disabled = running;
   if (running) {
     const t0 = Date.now();
     tick = window.setInterval(() => {
-      $('#consoleTimer').textContent = `${((Date.now() - t0) / 1000).toFixed(1)}s`;
+      if ($('#consoleTimer')) $('#consoleTimer').textContent = `${((Date.now() - t0) / 1000).toFixed(1)}s`;
     }, 100);
   } else if (tick !== null) {
     clearInterval(tick);
@@ -379,73 +349,249 @@ function setBusy(running, label = 'idle') {
   }
 }
 
-$('#labTarget').addEventListener('change', syncLab);
+/* ------------------------------------------------------------------
+   GSAP, ScrollTrigger & Lenis Motion Logic
+   ------------------------------------------------------------------ */
 
-$('#btnBreak').addEventListener('click', async () => {
-  const id = /** @type {HTMLSelectElement} */ ($('#labTarget')).value;
-  const mode = /** @type {HTMLSelectElement} */ ($('#labMode')).value;
-  if (!id) return;
-  setBusy(true, 'simulating layout change');
-  clearConsole(`simulating a redesign of the target page (${mode})…`);
-  try {
-    const data = await fetchJson(`/api/break/${id}`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ mode }),
-    });
-    push('');
-    push(`the page changed. the collector was NOT told.`);
-    push(`re-ran the collector: HTTP 200, no exception thrown.`);
-    push('');
-    push(`spider-sense: health ${data.verdict.health}/100  (status ${data.verdict.status})`);
-    push(`spider-sense: ${data.verdict.headline}`);
-    push(`spider-sense: records=${data.verdict.recordCount} missing=[${data.verdict.missingFields.join(', ') || 'none'}]`);
-    push('');
-    push('this is the silent failure. nothing in a normal alerting setup would fire.');
-    push('press HEAL IT to hand the failure signature to scraper studio.');
-    await refresh();
-  } catch (err) {
-    push(`error: ${err instanceof Error ? err.message : String(err)}`);
-  } finally {
-    setBusy(false, 'break simulated');
+function initAnimations() {
+  if (typeof gsap === 'undefined') return;
+
+  gsap.registerPlugin(ScrollTrigger);
+
+  // 1. Lenis Smooth Scrolling
+  let lenis = null;
+  if (typeof Lenis !== 'undefined') {
+    lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add((time) => lenis.raf(time * 1000));
+    gsap.ticker.lagSmoothing(0);
   }
-});
 
-$('#btnHeal').addEventListener('click', () => {
-  const id = /** @type {HTMLSelectElement} */ ($('#labTarget')).value;
-  setBusy(true, 'healing');
-  clearConsole('');
-  const source = new EventSource(`/api/heal/${id}/stream?force=1`);
+  // 2. Hero Animations
+  const heroTl = gsap.timeline({ defaults: { ease: 'power4.out' } });
+  heroTl.from('.hero__word', { yPercent: 110, duration: 1.1, stagger: 0.12 })
+        .from('.hero__kicker', { opacity: 0, y: 16, duration: 0.6 }, '-=0.6')
+        .from('.hero__sub', { opacity: 0, y: 20, duration: 0.6 }, '-=0.45')
+        .from('.hero__badge', { opacity: 0, scale: 0.85, duration: 0.5, stagger: 0.1 }, '-=0.4')
+        .from('.hero__sticker', { scale: 0, rotation: () => gsap.utils.random(-40, 40), duration: 0.7, ease: 'elastic.out(1, 0.45)', stagger: 0.1 }, '-=0.5')
+        .from('.hero__scrollhint', { opacity: 0, duration: 0.5 }, '-=0.3')
+        .from('.header', { y: -60, opacity: 0, duration: 0.7 }, '-=0.8');
 
-  source.addEventListener('line', (/** @type {MessageEvent} */ e) => push(JSON.parse(e.data).line));
-
-  source.addEventListener('done', async (/** @type {MessageEvent} */ e) => {
-    const { outcome } = JSON.parse(e.data);
-    push('');
-    if (outcome?.skipped) push(`skipped: ${outcome.reason}`);
-    else {
-      push(`── heal ${outcome.ok ? 'SUCCEEDED' : 'FAILED'} in ${(outcome.durationMs / 1000).toFixed(1)}s ──`);
-      push(`health ${outcome.healthBefore} -> ${outcome.healthAfter} · cli executed: ${outcome.executed}`);
-      push('no selector was written by a human at any point.');
-    }
-    source.close();
-    setBusy(false, outcome?.ok ? 'healed' : 'finished');
-    await refresh();
+  // Parallax stickers on scroll
+  gsap.utils.toArray('.hero__sticker').forEach((el) => {
+    gsap.to(el, {
+      y: () => -120 * (parseFloat(el.dataset.speed) || 1),
+      ease: 'none',
+      scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
+    });
   });
 
-  source.addEventListener('error', () => {
-    push('stream closed');
-    source.close();
-    setBusy(false, 'error');
+  // Hero text background pan
+  gsap.to('.hero__word--fill', {
+    backgroundPosition: '50% 85%',
+    ease: 'none',
+    scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
   });
-});
 
-$('#storyFilters').addEventListener('click', (e) => {
-  const btn = /** @type {HTMLElement} */ (e.target).closest('.chip');
-  if (!btn) return;
-  activeDesk = btn.getAttribute('data-desk') ?? 'all';
-  for (const chip of document.querySelectorAll('.chip')) chip.classList.toggle('is-on', chip === btn);
-  renderStories();
+  // 3. Marquees Infinite Scroll Loop
+  function marquee(sel, dir) {
+    const track = document.querySelector(sel + ' .marquee__track');
+    if (!track) return;
+    const tween = gsap.to(track, { xPercent: -50 * dir, duration: 20, ease: 'none', repeat: -1 });
+    if (dir < 0) gsap.set(track, { xPercent: -50 });
+
+    ScrollTrigger.create({
+      trigger: sel,
+      start: 'top bottom',
+      end: 'bottom top',
+      onUpdate(self) {
+        const v = self.getVelocity() / 1000;
+        tween.timeScale(gsap.utils.clamp(-4, 4, dir * (dir + v)) || dir * 0.2);
+      },
+    });
+  }
+  marquee('#marquee1', 1);
+  marquee('#marquee2', -1);
+
+  // 4. Pinned Origin Story Sequence
+  (function initOrigin() {
+    const scenes = gsap.utils.toArray('.origin__scene');
+    const num = $('#originNum');
+    if (!scenes.length || !num) return;
+
+    const storyTl = gsap.timeline({
+      scrollTrigger: {
+        trigger: '#origin',
+        start: 'top top',
+        end: '+=' + (scenes.length * 95) + '%',
+        pin: '#originPin',
+        scrub: 0.6,
+        onUpdate(self) {
+          const idx = Math.min(scenes.length - 1, Math.floor(self.progress * scenes.length));
+          num.textContent = String(idx + 1).padStart(2, '0');
+        },
+      },
+    });
+
+    scenes.forEach((scene, i) => {
+      const img = scene.querySelector('img');
+      const cap = scene.querySelector('.origin__caption');
+
+      if (img) storyTl.to(img, { scale: 1, duration: 1, ease: 'none' }, i);
+      if (i === 0 && cap) {
+        storyTl.from(cap, { y: 40, opacity: 0, duration: 0.3 }, 0.05);
+      }
+      if (i < scenes.length - 1) {
+        const next = scenes[i + 1];
+        storyTl.set(next, { visibility: 'visible' }, i + 0.55)
+               .fromTo(next,
+                 { clipPath: 'circle(0% at 50% 50%)' },
+                 { clipPath: 'circle(150% at 50% 50%)', duration: 0.45, ease: 'power2.inOut' },
+                 i + 0.55);
+        if (next.querySelector('.origin__caption')) {
+          storyTl.from(next.querySelector('.origin__caption'), { y: 40, opacity: 0, duration: 0.25 }, i + 0.85);
+        }
+      }
+    });
+  })();
+
+  // 5. Manifesto Character Scrub Reveal
+  (function initManifesto() {
+    const el = $('#manifestoText');
+    if (!el) return;
+    const text = el.textContent || '';
+    el.innerHTML = text.trim().split(' ').map((w) =>
+      `<span class="word">${[...w].map((c) => `<span class="char">${c}</span>`).join('')}</span>`
+    ).join(' ');
+
+    gsap.fromTo(el.querySelectorAll('.char'),
+      { opacity: 0.15, y: 32, rotateX: -60 },
+      {
+        opacity: 1, y: 0, rotateX: 0,
+        stagger: 0.5, ease: 'power2.out',
+        scrollTrigger: {
+          trigger: '#manifesto',
+          start: 'top 75%',
+          end: 'center 45%',
+          scrub: 0.5,
+        },
+      });
+  })();
+
+  // 6. Section Entrance Animations
+  gsap.utils.toArray('.panel, .section-head').forEach((el) => {
+    gsap.from(el, {
+      y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
+      scrollTrigger: { trigger: el, start: 'top 88%' },
+    });
+  });
+
+  // 7. Adaptive Top Header
+  (function initAdaptiveHeader() {
+    const header = document.querySelector('.header');
+    if (!header) return;
+    let darkCount = 0;
+    const syncHeader = () => header.classList.toggle('is-over-dark', darkCount > 0);
+
+    ['#origin', '#marquee2'].forEach((sel) => {
+      const el = document.querySelector(sel);
+      if (!el) return;
+      ScrollTrigger.create({
+        trigger: sel,
+        start: 'top 52px',
+        end: 'bottom 20px',
+        onEnter: () => { darkCount++; syncHeader(); },
+        onEnterBack: () => { darkCount++; syncHeader(); },
+        onLeave: () => { darkCount--; syncHeader(); },
+        onLeaveBack: () => { darkCount--; syncHeader(); },
+      });
+    });
+  })();
+}
+
+/* ------------------------------------------------------------------
+   Event Listeners
+   ------------------------------------------------------------------ */
+
+document.addEventListener('DOMContentLoaded', () => {
+  const labTarget = $('#labTarget');
+  if (labTarget) labTarget.addEventListener('change', syncLab);
+
+  const btnBreak = $('#btnBreak');
+  if (btnBreak) {
+    btnBreak.addEventListener('click', async () => {
+      const id = /** @type {HTMLSelectElement} */ ($('#labTarget')).value;
+      const mode = /** @type {HTMLSelectElement} */ ($('#labMode')).value;
+      if (!id) return;
+      setBusy(true, 'simulating layout change');
+      clearConsole(`simulating a redesign of the target page (${mode})…`);
+      try {
+        const data = await fetchJson(`/api/break/${id}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ mode }),
+        });
+        push('');
+        push(`the page changed. the collector was NOT told.`);
+        push(`re-ran the collector: HTTP 200, no exception thrown.`);
+        push('');
+        push(`spider-sense: health ${data.verdict.health}/100  (status ${data.verdict.status})`);
+        push(`spider-sense: ${data.verdict.headline}`);
+        push(`spider-sense: records=${data.verdict.recordCount} missing=[${data.verdict.missingFields.join(', ') || 'none'}]`);
+        push('');
+        push('this is the silent failure. nothing in a normal alerting setup would fire.');
+        push('press HEAL IT to hand the failure signature to scraper studio.');
+        await refresh();
+      } catch (err) {
+        push(`error: ${err instanceof Error ? err.message : String(err)}`);
+      } finally {
+        setBusy(false, 'break simulated');
+      }
+    });
+  }
+
+  const btnHeal = $('#btnHeal');
+  if (btnHeal) {
+    btnHeal.addEventListener('click', () => {
+      const id = /** @type {HTMLSelectElement} */ ($('#labTarget')).value;
+      setBusy(true, 'healing');
+      clearConsole('');
+      const source = new EventSource(`/api/heal/${id}/stream?force=1`);
+
+      source.addEventListener('line', (e) => push(JSON.parse(e.data).line));
+
+      source.addEventListener('done', async (e) => {
+        const { outcome } = JSON.parse(e.data);
+        push('');
+        if (outcome?.skipped) push(`skipped: ${outcome.reason}`);
+        else {
+          push(`── heal ${outcome.ok ? 'SUCCEEDED' : 'FAILED'} in ${(outcome.durationMs / 1000).toFixed(1)}s ──`);
+          push(`health ${outcome.healthBefore} -> ${outcome.healthAfter} · cli executed: ${outcome.executed}`);
+          push('no selector was written by a human at any point.');
+        }
+        source.close();
+        setBusy(false, outcome?.ok ? 'healed' : 'finished');
+        await refresh();
+      });
+
+      source.addEventListener('error', () => {
+        push('stream closed');
+        source.close();
+        setBusy(false, 'error');
+      });
+    });
+  }
+
+  const storyFilters = $('#storyFilters');
+  if (storyFilters) {
+    storyFilters.addEventListener('click', (e) => {
+      const btn = /** @type {HTMLElement} */ (e.target).closest('.chip');
+      if (!btn) return;
+      activeDesk = btn.getAttribute('data-desk') ?? 'all';
+      for (const chip of document.querySelectorAll('.chip')) chip.classList.toggle('is-on', chip === btn);
+      renderStories();
+    });
+  }
 });
 
 boot();

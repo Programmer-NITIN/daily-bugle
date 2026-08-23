@@ -3,11 +3,17 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>THE DAILY BUGLE — self-healing intel on the long tail of the web</title>
+<title>THE DAILY BUGLE — Self-Healing Intel on the Long Tail of the Web</title>
 <meta name="description" content="Self-healing web scrapers built with Bright Data Scraper Studio, published as a living comic newspaper. Spider-Sense detects silent extraction drift; bdata scraper heal repairs it with no human in the loop." />
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+
+<!-- GSAP + ScrollTrigger + Lenis -->
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/ScrollTrigger.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lenis@1.1.18/dist/lenis.min.js"></script>
+
 <link rel="stylesheet" href="/css/bugle.css" />
 </head>
 <body>
@@ -21,36 +27,134 @@
   </div>
 </div>
 
-<!-- ══ TICKER ═════════════════════════════════════════════════ -->
+<!-- ══ ADAPTIVE HEADER ════════════════════════════════════════ -->
+<header class="header">
+  <a class="header__logo" href="#top" data-cursor="THWIP">
+    <span class="header__logo-mark">🕷</span> THE DAILY BUGLE
+  </a>
+  <nav class="header__nav">
+    <a href="#origin" data-cursor="GO">Origin</a>
+    <a href="#lab" data-cursor="GO">Healing Lab</a>
+    <a href="#fleet" data-cursor="GO">Fleet</a>
+    <a href="#stories" data-cursor="GO">Wire</a>
+    <a href="#canon" data-cursor="GO">Audit</a>
+    <a href="#arch" data-cursor="GO">Arch</a>
+  </nav>
+</header>
+
+<!-- ══ TICKER RAIL ════════════════════════════════════════════ -->
 <div class="ticker" aria-hidden="true">
   <div class="ticker__rail" id="tickerRail"></div>
 </div>
 
-<main class="paper" id="paper">
+<!-- ══ HERO SECTION ══════════════════════════════════════════ -->
+<section class="hero" id="hero">
+  <canvas class="hero__canvas" id="heroCanvas"></canvas>
+  <div class="hero__halftone"></div>
 
-  <!-- ══ MASTHEAD ═════════════════════════════════════════════ -->
-  <header class="masthead">
-    <div class="masthead__rule"></div>
-    <div class="masthead__top">
-      <span class="masthead__meta" id="edition">VOL. 1 · NO. —</span>
-      <span class="masthead__meta masthead__meta--mid">EIGHT LONG-TAIL COLLECTORS · SCRAPER STUDIO POWERED</span>
-      <span class="masthead__meta" id="pressDate">—</span>
+  <div class="hero__content">
+    <div class="hero__kicker">
+      <span id="edition">VOL. 1 · NO. —</span> · <span id="pressDate">—</span>
     </div>
-    <h1 class="masthead__title">
-      <span class="masthead__the">The</span>DAILY BUGLE
+    <h1 class="hero__title">
+      <span class="hero__line"><span class="hero__word hero__word--fill" data-img="1">DAILY</span></span>
+      <span class="hero__line"><span class="hero__word hero__word--outline">BUGLE</span></span>
     </h1>
-    <div class="masthead__sub">
-      <span class="masthead__slogan">“The scrapers that fix themselves.”</span>
-      <span class="masthead__price" id="modeBadge">FIXTURE MODE</span>
+    <p class="hero__sub">
+      The scrapers that <em>fix themselves</em>.<br/>
+      Spinning payload scoring, silent drift detection & CLI repair loops into living press.
+    </p>
+    <div class="hero__badges">
+      <span class="hero__badge" id="modeBadge">FIXTURE MODE</span>
+      <span class="hero__badge hero__badge--tag">EIGHT LONG-TAIL COLLECTORS</span>
     </div>
-    <div class="masthead__rule masthead__rule--double"></div>
-  </header>
+  </div>
+
+  <div class="hero__sticker hero__sticker--1" data-speed="1.3">
+    <span>EXTRA! EXTRA!<br/>READ ALL ABOUT IT!</span>
+  </div>
+  <div class="hero__sticker hero__sticker--2" data-speed="0.8">
+    <span>SELF-HEALING<br/>SCRAPERS</span>
+  </div>
+
+  <div class="hero__scrollhint">
+    <span>SCROLL FOR THE STORY</span>
+    <div class="hero__scrollhint-line"></div>
+  </div>
+</section>
+
+<!-- ══ MARQUEE 1 ═════════════════════════════════════════════ -->
+<div class="marquee marquee--red" id="marquee1">
+  <div class="marquee__track">
+    <span>DAILY BUGLE ✦ BRIGHT DATA SCRAPER STUDIO ✦ SPIDER-SENSE DRIFT ✦ AUTOMATED REPAIR LOOP ✦ NO HUMAN SELECTOR MAINTENANCE ✦&nbsp;</span>
+    <span>DAILY BUGLE ✦ BRIGHT DATA SCRAPER STUDIO ✦ SPIDER-SENSE DRIFT ✦ AUTOMATED REPAIR LOOP ✦ NO HUMAN SELECTOR MAINTENANCE ✦&nbsp;</span>
+  </div>
+</div>
+
+<!-- ══ ORIGIN STORY (PINNED COMIC PAGES) ═════════════════════ -->
+<section class="origin" id="origin">
+  <div class="origin__pin" id="originPin">
+    <div class="origin__frame">
+
+      <div class="origin__scene is-first" data-scene="0">
+        <img src="/assets/comic-classic.jpg" alt="Fragile Web" />
+        <div class="origin__caption origin__caption--tl">
+          <span class="origin__caption-tag">PAGE 1 · THE FRAGILE WEB</span>
+          <p>Web pages shift silently. Selectors break, layout templates update, and traditional scrapers crash overnight without warning…</p>
+        </div>
+      </div>
+
+      <div class="origin__scene" data-scene="1">
+        <img src="/assets/am-i-crazy.jpg" alt="Silent Failure" />
+        <div class="origin__caption origin__caption--br">
+          <span class="origin__caption-tag">PAGE 2 · SILENT FAILURE</span>
+          <p>Silent extraction drift strikes! The HTTP status returns <b>200 OK</b>, but payload fields go hollow and zero data is extracted.</p>
+        </div>
+      </div>
+
+      <div class="origin__scene" data-scene="2">
+        <img src="/assets/blueprint.jpg" alt="Spider-Sense Scoring" />
+        <div class="origin__caption origin__caption--tl">
+          <span class="origin__caption-tag">PAGE 3 · SPIDER-SENSE SCORING</span>
+          <p>Enter <b>Spider-Sense</b> payload analysis! Four content health signals evaluate record count, depth, and field null rates in real time.</p>
+        </div>
+      </div>
+
+      <div class="origin__scene" data-scene="3">
+        <img src="/assets/iron-blueprint.jpg" alt="Scraper Studio Healing" />
+        <div class="origin__caption origin__caption--br">
+          <span class="origin__caption-tag">PAGE 4 · THE HEALING LOOP</span>
+          <p>Automated healing kicks in! Powered by <b>Bright Data Scraper Studio</b> & <code>bdata scraper heal</code> repair loop—re-extracting target schemas seamlessly.</p>
+        </div>
+      </div>
+
+    </div>
+    <div class="origin__counter"><span id="originNum">01</span> / 04</div>
+  </div>
+</section>
+
+<!-- ══ MANIFESTO (CHAR SCRUB REVEAL) ═════════════════════════ -->
+<section class="manifesto" id="manifesto">
+  <p class="manifesto__small">— THE DAILY BUGLE GUARANTEE —</p>
+  <h2 class="manifesto__text" id="manifestoText">THE PRESS THAT REPAIRS ITSELF WHEN THE WEB BREAKS</h2>
+  <p class="manifesto__sign">— Powered by Bright Data Scraper Studio & CLI repair loop</p>
+</section>
+
+<!-- ══ MARQUEE 2 ═════════════════════════════════════════════ -->
+<div class="marquee marquee--ink" id="marquee2">
+  <div class="marquee__track">
+    <span>8 TARGET COLLECTORS ✦ SPIDER-SENSE HEALTH GAUGES ✦ REAL-TIME SSE LOGS ✦ NO HUMAN IN THE LOOP ✦ ZERO SELECTOR MAINTENANCE ✦&nbsp;</span>
+    <span>8 TARGET COLLECTORS ✦ SPIDER-SENSE HEALTH GAUGES ✦ REAL-TIME SSE LOGS ✦ NO HUMAN IN THE LOOP ✦ ZERO SELECTOR MAINTENANCE ✦&nbsp;</span>
+  </div>
+</div>
+
+<main class="paper" id="paper">
 
   <!-- ══ FLEET STATS STRIP ════════════════════════════════════ -->
   <section class="strip" id="strip"></section>
 
   <!-- ══ LEAD STORY + SPIDER-SENSE ════════════════════════════ -->
-  <section class="above-fold">
+  <section class="above-fold" id="lead-section">
     <article class="lead panel" id="lead">
       <div class="lead__kicker">— LEAD STORY · RANKED BY THE NEWSROOM ENGINE —</div>
       <h2 class="lead__head" id="leadHead">loading the wire…</h2>
@@ -134,7 +238,7 @@
   </section>
 
   <!-- ══ COLLECTOR GRID ═══════════════════════════════════════ -->
-  <section class="fleet">
+  <section class="fleet" id="fleet">
     <div class="section-head">
       <h2>THE COLLECTOR FLEET</h2>
       <p>Eight niche developer tools with no pre-built scraper, no API and no RSS. Each one is a Scraper Studio collector generated from one sentence of plain English.</p>
@@ -143,7 +247,7 @@
   </section>
 
   <!-- ══ FRONT PAGE STORIES ═══════════════════════════════════ -->
-  <section class="stories">
+  <section class="stories" id="stories">
     <div class="section-head">
       <h2>OFF THE WIRE</h2>
       <p>Every changelog bullet, scored for what it will actually cost you. Breaking changes and pricing moves lead; chores get buried on page nine.</p>
@@ -159,7 +263,7 @@
   </section>
 
   <!-- ══ CANON TIMELINE ═══════════════════════════════════════ -->
-  <section class="canon">
+  <section class="canon" id="canon">
     <div class="section-head">
       <h2>THE CANON</h2>
       <p>Every break, detection, repair and recovery, in order. This is the audit trail that makes “self-healing” a claim you can check.</p>
@@ -168,7 +272,7 @@
   </section>
 
   <!-- ══ ARCHITECTURE ═════════════════════════════════════════ -->
-  <section class="arch">
+  <section class="arch" id="arch">
     <div class="section-head">
       <h2>HOW THE PRESS RUNS</h2>
       <p>One sentence in, a production API out, and a repair loop that closes itself.</p>
