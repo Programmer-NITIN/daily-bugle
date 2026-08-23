@@ -358,20 +358,18 @@ function initAnimations() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // 1. Lenis Smooth Scrolling (Optimized for zero lag)
+  // 1. Lenis Smooth Scrolling (Lag-free lerp interpolation)
   let lenis = null;
   if (typeof Lenis !== 'undefined') {
     lenis = new Lenis({
-      duration: 1.0,
-      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
-      orientation: 'vertical',
-      smoothWheel: true,
+      lerp: 0.09,
       wheelMultiplier: 1.0,
-      touchMultiplier: 1.5,
+      touchMultiplier: 1.2,
+      smoothTouch: false,
     });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
-    gsap.ticker.lagSmoothing(0);
+    gsap.ticker.lagSmoothing(500, 33);
   }
 
   // 2. Hero Animations
@@ -400,11 +398,13 @@ function initAnimations() {
     scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
   });
 
-  // 3. Scroll Spider Progress (Spider riding thread on right margin)
+  // 3. Scroll Spider Progress (High-frequency quickTo rotation)
   (function initScrollSpider() {
     const thread = $('#spiderThread');
     const bug = $('#spiderBug');
     if (!thread || !bug) return;
+
+    const setBugRotation = gsap.quickTo(bug, 'rotation', { duration: 0.25, ease: 'power2.out' });
 
     ScrollTrigger.create({
       start: 0,
@@ -413,11 +413,7 @@ function initAnimations() {
         const h = self.progress * (window.innerHeight - 90) + 50;
         thread.style.height = `${h}px`;
         bug.style.top = `${h}px`;
-        gsap.to(bug, {
-          rotation: gsap.utils.clamp(-26, 26, self.getVelocity() / 90),
-          duration: 0.3,
-          overwrite: 'auto',
-        });
+        setBugRotation(gsap.utils.clamp(-26, 26, self.getVelocity() / 90));
       },
     });
   })();
@@ -649,9 +645,10 @@ function initAnimations() {
       scrollTrigger: {
         trigger: '#origin',
         start: 'top top',
-        end: '+=' + (scenes.length * 95) + '%',
+        end: '+=' + (scenes.length * 90) + '%',
         pin: '#originPin',
-        scrub: 0.6,
+        anticipatePin: 1,
+        scrub: 0.4,
         onUpdate(self) {
           const idx = Math.min(scenes.length - 1, Math.floor(self.progress * scenes.length));
           num.textContent = String(idx + 1).padStart(2, '0');
