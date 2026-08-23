@@ -15,11 +15,24 @@ Built for **[Into the Scrape-Verse Hackathon](https://www.wemakedevs.org/hackath
 
 ---
 
-### 🌟 Quick Links for Hackathon Evaluators
+### 🌟 Quick Links & Live Application
 - 🌐 **Live Web Application**: [https://dailybugle-scrapeverse.vercel.app/](https://dailybugle-scrapeverse.vercel.app/)
-- 🧪 **Interactive Healing Lab**: Select a collector, trigger a layout break, and watch the autonomous repair stream live in the browser!
-- 🕷 **Spider-Sense Scoring Engine**: Quantitative drift detection across 4 content signals (`lib/spider-sense.js`).
-- ⚡ **Zero Runtime Dependencies**: Clones instantly and runs everywhere with zero npm install breakages.
+- 🧪 **Interactive Healing Lab**: Select a target collector, simulate layout drift, and watch the autonomous repair stream live over SSE!
+- 🕷 **Spider-Sense Scoring Engine**: Quantitative 4-signal drift detection (`lib/spider-sense.js`).
+- ⚡ **Zero Runtime Dependencies**: Instantly runnable locally and on Vercel with zero package installation rot.
+
+---
+
+## 🏆 WeMakeDevs Hackathon Criteria Alignment Matrix
+
+| Hackathon Criterion | How The Daily Bugle Delivers | Verification / Source Code |
+|---|---|---|
+| **1. Potential Impact** | Solves silent scraper failure (HTTP 200 with hollow arrays) across 8 developer tool changelogs. Prevents outdated competitive intelligence reports. | [Spider-Sense Signal Specs](#spider-sense--detecting-a-silent-failure) |
+| **2. Creativity & Innovation** | Combines autonomous scraper healing with a dynamic comic newspaper publishing interface that ranks tech releases by breaking cost. | [`lib/newsroom.js`](file:///c:/Users/nitin/scrape-verse%20hackathon/daily-bugle/lib/newsroom.js) |
+| **3. Technical Excellence** | Zero runtime dependencies (`0` npm packages), 100% native Node.js ES modules, JSDoc typechecking, and 19 passing unit tests (`node:test`). | [`test/`](file:///c:/Users/nitin/scrape-verse%20hackathon/daily-bugle/test) |
+| **4. Use of Scraper Studio** | 100% powered by Bright Data Scraper Studio CLI & API (`bdata scraper create`, `run`, `heal`, `POST /dca/trigger`). | [`lib/brightdata.js`](file:///c:/Users/nitin/scrape-verse%20hackathon/daily-bugle/lib/brightdata.js) |
+| **5. Reliability & Self-Healing** | Detects drift across 4 quantitative signals $\rightarrow$ generates plain-English repair brief $\rightarrow$ calls `bdata scraper heal` $\rightarrow$ re-verifies live payload health. | [`lib/heal.js`](file:///c:/Users/nitin/scrape-verse%20hackathon/daily-bugle/lib/heal.js) |
+| **6. Presentation** | State-of-the-art comic newspaper frontend featuring live Server-Sent Events (SSE) streaming terminal, interactive Healing Lab, and responsive analytics. | [Live Demo](https://dailybugle-scrapeverse.vercel.app/) |
 
 ---
 
