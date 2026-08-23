@@ -26,8 +26,7 @@ const HISTORIC_BREAK = { targetId: 'typst', dayIndex: 5, mode: /** @type {const}
  * @returns {string}
  */
 function pressTime(daysAgo) {
-  const base = Date.parse('2026-08-23T06:00:00.000Z');
-  return new Date(base - daysAgo * 86_400_000).toISOString();
+  return new Date(Date.now() - daysAgo * 86_400_000).toISOString();
 }
 
 /**
