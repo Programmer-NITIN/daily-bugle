@@ -1,0 +1,94 @@
+{
+  "$comment": "The Daily Bugle target registry. Every target is a LONG-TAIL source: niche, self-hosted or indie developer tooling with no pre-built Bright Data scraper. Each target is described in plain language and that description is what Scraper Studio compiles into a collector. `collectorEnv` names the .env key holding the c_* id.",
+  "version": 1,
+  "targets": [
+    {
+      "id": "pocketbase",
+      "name": "PocketBase",
+      "category": "Backend / BaaS",
+      "url": "https://pocketbase.io/release-notes/",
+      "collectorEnv": "COLLECTOR_POCKETBASE",
+      "prompt": "Extract every release note entry on the page. For each entry capture the version tag, the release date, and each individual changelog bullet point together with its type classified as one of feature, fix, breaking, or chore. Also capture any migration or upgrade warning text associated with the release.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "high",
+      "why": "Single-binary Go backend with a fast-moving release cadence and frequent breaking changes before 1.0. No API, no RSS."
+    },
+    {
+      "id": "coolify",
+      "name": "Coolify",
+      "category": "Self-hosted PaaS",
+      "url": "https://coolify.io/docs/changelog",
+      "collectorEnv": "COLLECTOR_COOLIFY",
+      "prompt": "Extract each changelog release: the version number, the publish date, and every change line grouped by whether it is a new feature, a bug fix, or a breaking change. Capture the release title if one is present.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "high",
+      "why": "Direct open-source competitor to Vercel/Netlify. Ships multiple times a week; the changelog is the only public signal."
+    },
+    {
+      "id": "umami",
+      "name": "Umami Analytics",
+      "category": "Analytics",
+      "url": "https://github.com/umami-software/umami/releases",
+      "collectorEnv": "COLLECTOR_UMAMI",
+      "prompt": "Extract every release listed: the tag name, the published date, and the body of the release notes broken into individual bullet points with a type of feature, fix, or breaking.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "medium",
+      "why": "Privacy-first Google Analytics alternative. Pricing page and release notes both move; useful pricing-pressure signal."
+    },
+    {
+      "id": "meilisearch",
+      "name": "Meilisearch",
+      "category": "Search",
+      "url": "https://www.meilisearch.com/docs/learn/resources/versioning",
+      "collectorEnv": "COLLECTOR_MEILISEARCH",
+      "prompt": "Extract the documented versions with their release dates and any noted breaking changes or migration requirements between versions.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "medium",
+      "why": "Competes with Algolia on price. Breaking changes between minors are a real migration cost worth tracking."
+    },
+    {
+      "id": "typst",
+      "name": "Typst",
+      "category": "Publishing / DX",
+      "url": "https://typst.app/docs/changelog/",
+      "collectorEnv": "COLLECTOR_TYPST",
+      "prompt": "Extract every changelog section: the version heading, its date, and each described change as a separate bullet with a type of feature, fix, or breaking. Preserve the category subheadings used inside each release.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "medium",
+      "why": "LaTeX replacement with a deeply nested, custom-rendered changelog. Excellent stress test for layout drift."
+    },
+    {
+      "id": "caddy",
+      "name": "Caddy Server",
+      "category": "Infrastructure",
+      "url": "https://github.com/caddyserver/caddy/releases",
+      "collectorEnv": "COLLECTOR_CADDY",
+      "prompt": "Extract each release: tag name, publish date, and the changelog body split into individual entries classified as feature, fix, or breaking.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "low",
+      "why": "Automatic-HTTPS web server. Slow, high-signal releases; a good control target that should stay healthy."
+    },
+    {
+      "id": "turso",
+      "name": "Turso",
+      "category": "Database",
+      "url": "https://turso.tech/changelog",
+      "collectorEnv": "COLLECTOR_TURSO",
+      "prompt": "Extract every changelog post: the title, the publish date, the version if stated, and the body summarised into individual change bullets with a type of feature, fix, or breaking. Also capture any pricing or quota change mentioned in the body.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "high",
+      "why": "Edge SQLite. Pricing and free-tier quotas have shifted repeatedly; the changelog is where it surfaces first."
+    },
+    {
+      "id": "zed",
+      "name": "Zed Editor",
+      "category": "Developer tools",
+      "url": "https://zed.dev/releases/stable",
+      "collectorEnv": "COLLECTOR_ZED",
+      "prompt": "Extract each stable release entry: the version number, the release date, and every changelog line item with a type of feature, fix, or breaking. Include the release headline where present.",
+      "expectedFields": ["version", "releasedAt", "entries"],
+      "signal": "high",
+      "why": "Ships weekly with a heavily client-rendered releases page that redesigns often. The canonical layout-drift target."
+    }
+  ]
+}

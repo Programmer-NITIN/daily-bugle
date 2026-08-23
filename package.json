@@ -1,0 +1,35 @@
+{
+  "name": "daily-bugle",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Self-healing competitive intelligence for the long tail of the web. Bright Data Scraper Studio collectors + Spider-Sense drift detection + autonomous `bdata scraper heal`, published as a living comic newspaper.",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js",
+    "seed": "node bin/seed.js",
+    "scrape": "node bin/scrape.js",
+    "break": "node bin/simulate-break.js",
+    "heal": "node bin/heal-cli.js",
+    "collectors": "node bin/collectors.js",
+    "typecheck": "tsc --noEmit",
+    "test": "node --test \"test/**/*.test.js\""
+  },
+  "keywords": [
+    "bright-data",
+    "scraper-studio",
+    "self-healing",
+    "web-scraping",
+    "competitive-intelligence"
+  ],
+  "dependencies": {},
+  "devDependencies": {
+    "@types/node": "^22.10.2",
+    "typescript": "^5.7.2"
+  },
+  "author": "Nitin Patidar",
+  "license": "MIT"
+}

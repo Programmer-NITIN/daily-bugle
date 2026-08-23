@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>THE DAILY BUGLE — self-healing intel on the long tail of the web</title>
+<meta name="description" content="Self-healing web scrapers built with Bright Data Scraper Studio, published as a living comic newspaper. Spider-Sense detects silent extraction drift; bdata scraper heal repairs it with no human in the loop." />
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Bangers&family=Permanent+Marker&family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/bugle.css" />
+</head>
+<body>
+
+<!-- ══ PRELOADER ══════════════════════════════════════════════ -->
+<div class="press" id="press">
+  <div class="press__inner">
+    <div class="press__plate">THE DAILY BUGLE</div>
+    <div class="press__bar"><span id="pressBar"></span></div>
+    <div class="press__status" id="pressStatus">rolling the presses…</div>
+  </div>
+</div>
+
+<!-- ══ TICKER ═════════════════════════════════════════════════ -->
+<div class="ticker" aria-hidden="true">
+  <div class="ticker__rail" id="tickerRail"></div>
+</div>
+
+<main class="paper" id="paper">
+
+  <!-- ══ MASTHEAD ═════════════════════════════════════════════ -->
+  <header class="masthead">
+    <div class="masthead__rule"></div>
+    <div class="masthead__top">
+      <span class="masthead__meta" id="edition">VOL. 1 · NO. —</span>
+      <span class="masthead__meta masthead__meta--mid">EIGHT LONG-TAIL COLLECTORS · SCRAPER STUDIO POWERED</span>
+      <span class="masthead__meta" id="pressDate">—</span>
+    </div>
+    <h1 class="masthead__title">
+      <span class="masthead__the">The</span>DAILY BUGLE
+    </h1>
+    <div class="masthead__sub">
+      <span class="masthead__slogan">“The scrapers that fix themselves.”</span>
+      <span class="masthead__price" id="modeBadge">FIXTURE MODE</span>
+    </div>
+    <div class="masthead__rule masthead__rule--double"></div>
+  </header>
+
+  <!-- ══ FLEET STATS STRIP ════════════════════════════════════ -->
+  <section class="strip" id="strip"></section>
+
+  <!-- ══ LEAD STORY + SPIDER-SENSE ════════════════════════════ -->
+  <section class="above-fold">
+    <article class="lead panel" id="lead">
+      <div class="lead__kicker">— LEAD STORY · RANKED BY THE NEWSROOM ENGINE —</div>
+      <h2 class="lead__head" id="leadHead">loading the wire…</h2>
+      <p class="lead__body" id="leadBody"></p>
+      <div class="lead__byline" id="leadByline"></div>
+    </article>
+
+    <aside class="sense panel" id="sense">
+      <div class="panel__label">SPIDER-SENSE</div>
+      <div class="sense__gauge">
+        <svg viewBox="0 0 120 120" class="sense__dial">
+          <circle cx="60" cy="60" r="52" class="sense__track" />
+          <circle cx="60" cy="60" r="52" class="sense__fill" id="senseFill" />
+        </svg>
+        <div class="sense__readout">
+          <strong id="fleetHealth">—</strong>
+          <span>FLEET HEALTH</span>
+        </div>
+      </div>
+      <ul class="sense__lines" id="senseLines"></ul>
+      <div class="sense__note">Four content signals, no HTTP status codes. A drifted scraper returns 200 and lies.</div>
+    </aside>
+  </section>
+
+  <!-- ══ SELF-HEALING LAB ═════════════════════════════════════ -->
+  <section class="lab" id="lab">
+    <div class="section-head">
+      <h2>THE HEALING LAB</h2>
+      <p>Break a site. Watch Spider-Sense notice. Watch <code>bdata scraper heal</code> put it back. Nobody writes a selector.</p>
+    </div>
+
+    <div class="lab__grid">
+      <div class="lab__controls panel">
+        <div class="panel__label">STEP 1 · PICK A VICTIM</div>
+        <label class="field">
+          <span>Collector</span>
+          <select id="labTarget"></select>
+        </label>
+        <label class="field">
+          <span>How the site breaks</span>
+          <select id="labMode">
+            <option value="selector-drift">selector drift — fields go hollow</option>
+            <option value="field-renamed">list renamed — bullets vanish</option>
+            <option value="total-blackout">total blackout — zero records</option>
+          </select>
+        </label>
+        <div class="lab__buttons">
+          <button class="btn btn--break" id="btnBreak">💥 BREAK IT</button>
+          <button class="btn btn--heal" id="btnHeal">🕷 HEAL IT</button>
+        </div>
+        <div class="lab__hint" id="labHint">Nothing broken yet. Every collector is in print.</div>
+
+        <div class="lab__meters">
+          <div class="meter">
+            <span class="meter__label">HEALTH</span>
+            <div class="meter__bar"><i id="meterHealth" style="width:100%"></i></div>
+            <span class="meter__value" id="meterHealthVal">—</span>
+          </div>
+          <div class="meter">
+            <span class="meter__label">RECORDS</span>
+            <div class="meter__bar"><i id="meterRecords" style="width:100%"></i></div>
+            <span class="meter__value" id="meterRecordsVal">—</span>
+          </div>
+          <div class="meter">
+            <span class="meter__label">FIELDS</span>
+            <div class="meter__bar"><i id="meterFields" style="width:100%"></i></div>
+            <span class="meter__value" id="meterFieldsVal">—</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="lab__console panel">
+        <div class="panel__label">STEP 2 · THE REPAIR, LIVE</div>
+        <div class="console" id="console"><div class="console__idle">awaiting orders. break a collector, then heal it.</div></div>
+        <div class="console__foot">
+          <span id="consoleState">idle</span>
+          <span id="consoleTimer">0.0s</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ COLLECTOR GRID ═══════════════════════════════════════ -->
+  <section class="fleet">
+    <div class="section-head">
+      <h2>THE COLLECTOR FLEET</h2>
+      <p>Eight niche developer tools with no pre-built scraper, no API and no RSS. Each one is a Scraper Studio collector generated from one sentence of plain English.</p>
+    </div>
+    <div class="fleet__grid" id="fleetGrid"></div>
+  </section>
+
+  <!-- ══ FRONT PAGE STORIES ═══════════════════════════════════ -->
+  <section class="stories">
+    <div class="section-head">
+      <h2>OFF THE WIRE</h2>
+      <p>Every changelog bullet, scored for what it will actually cost you. Breaking changes and pricing moves lead; chores get buried on page nine.</p>
+    </div>
+    <div class="stories__filters" id="storyFilters">
+      <button class="chip is-on" data-desk="all">ALL DESKS</button>
+      <button class="chip" data-desk="Breaking desk">BREAKING</button>
+      <button class="chip" data-desk="Money desk">MONEY</button>
+      <button class="chip" data-desk="Security desk">SECURITY</button>
+      <button class="chip" data-desk="Features desk">FEATURES</button>
+    </div>
+    <div class="stories__cols" id="storyCols"></div>
+  </section>
+
+  <!-- ══ CANON TIMELINE ═══════════════════════════════════════ -->
+  <section class="canon">
+    <div class="section-head">
+      <h2>THE CANON</h2>
+      <p>Every break, detection, repair and recovery, in order. This is the audit trail that makes “self-healing” a claim you can check.</p>
+    </div>
+    <ol class="canon__list" id="canonList"></ol>
+  </section>
+
+  <!-- ══ ARCHITECTURE ═════════════════════════════════════════ -->
+  <section class="arch">
+    <div class="section-head">
+      <h2>HOW THE PRESS RUNS</h2>
+      <p>One sentence in, a production API out, and a repair loop that closes itself.</p>
+    </div>
+    <div class="arch__flow">
+      <div class="arch__node"><b>1</b><h4>Describe</h4><p>One sentence of plain English per target in <code>data/targets.json</code>.</p></div>
+      <div class="arch__arrow">▸</div>
+      <div class="arch__node"><b>2</b><h4>Generate</h4><p><code>bdata scraper create</code> compiles it into a collector. You own the code.</p></div>
+      <div class="arch__arrow">▸</div>
+      <div class="arch__node"><b>3</b><h4>Trigger</h4><p><code>POST /dca/trigger</code> — a production endpoint with no infra of ours.</p></div>
+      <div class="arch__arrow">▸</div>
+      <div class="arch__node"><b>4</b><h4>Sense</h4><p>Four content signals score the payload. Silent failures get caught.</p></div>
+      <div class="arch__arrow">▸</div>
+      <div class="arch__node arch__node--hot"><b>5</b><h4>Heal</h4><p><code>bdata scraper heal</code> with a brief derived from the failure itself.</p></div>
+      <div class="arch__arrow">▸</div>
+      <div class="arch__node"><b>6</b><h4>Verify</h4><p>Re-scrape, re-score. Only a passing payload closes the loop.</p></div>
+    </div>
+  </section>
+
+  <footer class="colophon">
+    <div class="colophon__rule"></div>
+    <div class="colophon__grid">
+      <div>
+        <h5>THE DAILY BUGLE</h5>
+        <p>Built for <b>Into the Scrape-Verse</b> — WeMakeDevs × Bright Data, August 2026.</p>
+      </div>
+      <div>
+        <h5>OPERATED FROM THE TERMINAL</h5>
+        <p><code>npm run seed</code> · <code>npm run scrape</code> · <code>npm run break</code> · <code>npm run heal</code></p>
+      </div>
+      <div>
+        <h5>PUBLIC DATA ONLY</h5>
+        <p>Eight public changelogs. No logins, no paywalls, no personal data. Tokens live in <code>.env</code> and are redacted everywhere.</p>
+      </div>
+    </div>
+  </footer>
+</main>
+
+<script src="/js/bugle.js" type="module"></script>
+</body>
+</html>

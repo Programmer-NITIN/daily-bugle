@@ -1,0 +1,209 @@
+{
+  "$comment": "Committed snapshots of real Scraper Studio payload shapes, one bucket per target id. These make the repo runnable with zero credentials (BUGLE_MODE=fixture). In live mode they are ignored and the c_* collectors are triggered instead.",
+  "version": 1,
+  "capturedAt": "2026-08-22T09:12:00.000Z",
+  "snapshots": {
+    "pocketbase": [
+      {
+        "version": "v0.29.3",
+        "releasedAt": "2026-08-19",
+        "headline": "Realtime subscriptions no longer drop on token refresh",
+        "entries": [
+          { "type": "fix", "text": "Realtime clients kept their subscription across an auth token refresh instead of silently disconnecting." },
+          { "type": "feature", "text": "Added `@request.body` access inside API rules for POST and PATCH." },
+          { "type": "chore", "text": "Bumped the embedded SQLite build to 3.47.2." }
+        ]
+      },
+      {
+        "version": "v0.29.0",
+        "releasedAt": "2026-08-04",
+        "headline": "Collection schema fields moved to a typed registry",
+        "entries": [
+          { "type": "breaking", "text": "`schema` on a collection is renamed to `fields`; the old key is read but no longer written. Run the shipped migration before upgrading a cluster." },
+          { "type": "breaking", "text": "The Go SDK's `models.Record.SetDataValue` is removed in favour of `Set`." },
+          { "type": "feature", "text": "New `geoPoint` field type with radius filtering in list queries." },
+          { "type": "fix", "text": "OAuth2 state cookie now sets SameSite=Lax so Safari completes the redirect." }
+        ]
+      },
+      {
+        "version": "v0.28.4",
+        "releasedAt": "2026-07-21",
+        "headline": "Backup restore stops holding a write lock",
+        "entries": [
+          { "type": "fix", "text": "Restoring a backup no longer blocks writes for the duration of the copy." },
+          { "type": "feature", "text": "`pocketbase serve --http` accepts a unix socket path." }
+        ]
+      }
+    ],
+    "coolify": [
+      {
+        "version": "4.0.0-beta.512",
+        "releasedAt": "2026-08-21",
+        "headline": "Per-service resource limits land in the UI",
+        "entries": [
+          { "type": "feature", "text": "CPU and memory limits are configurable per service without editing the compose file." },
+          { "type": "feature", "text": "Deployment queue shows a live position indicator for queued builds." },
+          { "type": "fix", "text": "Fixed a race where two pushes to the same branch could deploy out of order." }
+        ]
+      },
+      {
+        "version": "4.0.0-beta.508",
+        "releasedAt": "2026-08-13",
+        "headline": "Traefik labels regenerated on every deploy",
+        "entries": [
+          { "type": "breaking", "text": "Custom Traefik labels set through the UI are now regenerated on deploy; move hand-written labels into the new `proxy.labels` block or they will be dropped." },
+          { "type": "fix", "text": "Wildcard certificates renew correctly when multiple domains share one resource." },
+          { "type": "chore", "text": "Dropped support for Docker Engine below 24.0." }
+        ]
+      },
+      {
+        "version": "4.0.0-beta.501",
+        "releasedAt": "2026-08-02",
+        "headline": "S3-compatible backups for Postgres services",
+        "entries": [
+          { "type": "feature", "text": "Scheduled Postgres backups can target any S3-compatible endpoint, including R2 and Backblaze." },
+          { "type": "fix", "text": "Server onboarding no longer fails when the host has an IPv6-only interface." }
+        ]
+      }
+    ],
+    "umami": [
+      {
+        "version": "v2.20.0",
+        "releasedAt": "2026-08-18",
+        "headline": "Funnel reports get step-level drop-off",
+        "entries": [
+          { "type": "feature", "text": "Funnel report shows drop-off percentage per step and supports up to 10 steps." },
+          { "type": "feature", "text": "Added a self-hosted licence check that stays fully offline." },
+          { "type": "fix", "text": "Session counts no longer double when a visitor switches protocol mid-session." }
+        ]
+      },
+      {
+        "version": "v2.19.0",
+        "releasedAt": "2026-07-30",
+        "headline": "Cloud free tier drops to 50k events",
+        "entries": [
+          { "type": "breaking", "text": "Umami Cloud free tier reduced from 100k to 50k events per month; self-hosted is unaffected." },
+          { "type": "feature", "text": "New `/api/send` batching endpoint accepts up to 50 events per request." },
+          { "type": "fix", "text": "Fixed timezone offset in the hourly chart for UTC+05:30." }
+        ]
+      }
+    ],
+    "meilisearch": [
+      {
+        "version": "v1.22.0",
+        "releasedAt": "2026-08-11",
+        "headline": "Hybrid search leaves experimental",
+        "entries": [
+          { "type": "feature", "text": "Hybrid keyword plus vector search is stable and no longer behind an experimental flag." },
+          { "type": "breaking", "text": "The `vectorStore` experimental feature toggle is removed; embedders are configured per index instead." },
+          { "type": "fix", "text": "Task queue no longer stalls when an index is deleted while a document addition is enqueued." }
+        ]
+      },
+      {
+        "version": "v1.21.1",
+        "releasedAt": "2026-07-24",
+        "headline": "Snapshot import respects custom data paths",
+        "entries": [
+          { "type": "fix", "text": "`--import-snapshot` honours `--db-path` instead of writing to the default directory." },
+          { "type": "chore", "text": "Reduced idle memory by roughly 18% on indexes above 1M documents." }
+        ]
+      }
+    ],
+    "typst": [
+      {
+        "version": "0.14.0",
+        "releasedAt": "2026-08-15",
+        "headline": "Native tables get repeating headers",
+        "entries": [
+          { "type": "feature", "text": "`table.header` repeats across page breaks and accepts a `repeat` argument." },
+          { "type": "feature", "text": "New `context` expressions can read the current page number." },
+          { "type": "breaking", "text": "`style()` is removed; use `context` instead. The compiler emits a migration hint for one release." },
+          { "type": "fix", "text": "Fixed baseline drift when mixing CJK and Latin text in one paragraph." }
+        ]
+      },
+      {
+        "version": "0.13.2",
+        "releasedAt": "2026-07-18",
+        "headline": "PDF/A-2b export",
+        "entries": [
+          { "type": "feature", "text": "Export targets PDF/A-2b for archival submissions." },
+          { "type": "fix", "text": "Bibliography sorting is stable for entries sharing an author and year." }
+        ]
+      }
+    ],
+    "caddy": [
+      {
+        "version": "v2.10.2",
+        "releasedAt": "2026-08-06",
+        "headline": "ACME retries back off per-issuer",
+        "entries": [
+          { "type": "fix", "text": "Certificate issuance backs off per issuer so a failing ACME server no longer delays the others." },
+          { "type": "feature", "text": "`reverse_proxy` supports `lb_policy weighted_round_robin` with per-upstream weights." }
+        ]
+      },
+      {
+        "version": "v2.10.0",
+        "releasedAt": "2026-06-29",
+        "headline": "HTTP/3 on by default",
+        "entries": [
+          { "type": "feature", "text": "HTTP/3 is enabled by default for all TLS-enabled sites." },
+          { "type": "breaking", "text": "The `experimental_http3` global option is removed and now errors at config load." },
+          { "type": "chore", "text": "Minimum Go version raised to 1.24." }
+        ]
+      }
+    ],
+    "turso": [
+      {
+        "version": "2026.08.20",
+        "releasedAt": "2026-08-20",
+        "headline": "Embedded replicas support write-through sync",
+        "entries": [
+          { "type": "feature", "text": "Embedded replicas accept writes locally and sync them through to the primary." },
+          { "type": "feature", "text": "Branch databases can be created from a point-in-time restore." },
+          { "type": "fix", "text": "Fixed a connection leak in the Rust client under high concurrency." }
+        ]
+      },
+      {
+        "version": "2026.08.05",
+        "releasedAt": "2026-08-05",
+        "headline": "Free plan row-read quota cut to 500M",
+        "entries": [
+          { "type": "breaking", "text": "Free plan monthly row reads reduced from 1B to 500M; existing databases keep the old quota until October." },
+          { "type": "feature", "text": "Usage dashboard exposes per-database row-read counters over the API." },
+          { "type": "fix", "text": "Schema migrations on a parent database now propagate to child branches atomically." }
+        ]
+      }
+    ],
+    "zed": [
+      {
+        "version": "0.212.0",
+        "releasedAt": "2026-08-22",
+        "headline": "Debugger reaches general availability",
+        "entries": [
+          { "type": "feature", "text": "The DAP-based debugger is generally available for Rust, Go, Python and JavaScript." },
+          { "type": "feature", "text": "Multibuffer edits can be staged per-hunk before committing." },
+          { "type": "fix", "text": "Fixed a hang when a language server returned a 40MB semantic-tokens response." }
+        ]
+      },
+      {
+        "version": "0.211.0",
+        "releasedAt": "2026-08-15",
+        "headline": "Settings move to a layered resolution model",
+        "entries": [
+          { "type": "breaking", "text": "Project settings now override user settings per-key rather than per-block; deeply nested `languages` overrides must be flattened." },
+          { "type": "feature", "text": "Added `agent.model` so the inline assistant can differ from the panel." },
+          { "type": "fix", "text": "Vim mode respects `scrolloff` when jumping to a search result." }
+        ]
+      },
+      {
+        "version": "0.210.2",
+        "releasedAt": "2026-08-08",
+        "headline": "Collab sessions survive a network flap",
+        "entries": [
+          { "type": "fix", "text": "Collaboration sessions reconnect without dropping unsaved buffers." },
+          { "type": "chore", "text": "Reduced cold-start time by around 90ms on Linux." }
+        ]
+      }
+    ]
+  }
+}
