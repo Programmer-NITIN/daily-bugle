@@ -773,3 +773,82 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 .colophon__grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 2rem; }
 .colophon h5 { font-family: var(--font-display); font-size: 1.3rem; margin-bottom: 0.5rem; }
 .colophon p { font-size: 0.85rem; line-height: 1.45; color: #444; }
+
+/* ============================================================
+   STARK MODE THEME OVERRIDES
+   ============================================================ */
+.stark-btn {
+  font-family: var(--font-comic);
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+  background: var(--gold);
+  color: var(--ink);
+  border: 2px solid var(--ink);
+  padding: 0.35rem 0.85rem;
+  cursor: pointer;
+  box-shadow: 3px 3px 0 var(--ink);
+  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  will-change: transform;
+}
+.stark-btn:hover {
+  background: var(--red);
+  color: var(--paper);
+  transform: translateY(-2px);
+  box-shadow: 5px 5px 0 var(--ink);
+}
+.stark-btn:active {
+  transform: translateY(1px);
+  box-shadow: 2px 2px 0 var(--ink);
+}
+
+body.stark-mode {
+  --red: #ff2424;
+  --red-dark: #b80000;
+  --paper: #0e0b12;
+  --paper-dark: #17131f;
+  --paper-deep: #211c2c;
+  --ink: #ffe6a7;
+  --gold: #ffbe0b;
+  color: #ffe6a7;
+  background: #09070d;
+}
+
+body.stark-mode .header {
+  background: rgba(23, 19, 31, 0.96);
+  color: var(--gold);
+  border-bottom-color: var(--red);
+}
+
+body.stark-mode .hero {
+  background: #09070d;
+}
+
+body.stark-mode .hero__word--fill {
+  -webkit-text-stroke: 2.5px var(--gold);
+  filter: drop-shadow(6px 6px 0 var(--red));
+}
+
+body.stark-mode .hero__word--outline {
+  -webkit-text-stroke: 3.5px var(--gold);
+  text-shadow: 10px 10px 0 var(--red);
+}
+
+body.stark-mode .card,
+body.stark-mode .story,
+body.stark-mode .canon__card,
+body.stark-mode .arch__node {
+  background: var(--paper-dark);
+  color: var(--ink);
+  border-color: var(--gold);
+  box-shadow: 5px 5px 0 var(--red);
+}
+
+body.stark-mode .stark-btn {
+  background: var(--red);
+  color: #ffffff;
+  border-color: var(--gold);
+  box-shadow: 4px 4px 0 var(--gold);
+}

@@ -353,6 +353,8 @@ function setBusy(running, label = 'idle') {
    GSAP, ScrollTrigger, Lenis Smooth Scroll & Spiders Motion Logic
    ------------------------------------------------------------------ */
 
+let globalLenis = null;
+
 function initAnimations() {
   if (typeof gsap === 'undefined') return;
 
@@ -370,6 +372,7 @@ function initAnimations() {
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(500, 33);
+    globalLenis = lenis;
   }
 
   // 2. Hero Animations
@@ -815,6 +818,44 @@ document.addEventListener('DOMContentLoaded', () => {
       renderStories();
     });
   }
+
+  // Stark Mode Toggle & Scroll to Top
+  function toggleStarkMode() {
+    const isStark = document.body.classList.toggle('stark-mode');
+    const label = isStark ? '🕷 SPIDER MODE' : '⚡ STARK UPGRADE';
+    ['#btnStarkUpgrade', '#btnStarkHero'].forEach((sel) => {
+      const btn = $(sel);
+      if (btn) btn.textContent = label;
+    });
+
+    // Move to top of the page smoothly upon activation
+    if (globalLenis) {
+      globalLenis.scrollTo(0, { duration: 1.2 });
+    } else {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  $('#btnStarkUpgrade')?.addEventListener('click', toggleStarkMode);
+  $('#btnStarkHero')?.addEventListener('click', toggleStarkMode);
+
+  // Smooth scroll for header anchor links
+  document.querySelectorAll('a[href^="#"]').forEach((a) => {
+    a.addEventListener('click', (e) => {
+      const href = a.getAttribute('href');
+      if (!href) return;
+      const target = href === '#hero' || href === '#top' ? 0 : document.querySelector(href);
+      if (target !== null) {
+        e.preventDefault();
+        if (globalLenis) {
+          globalLenis.scrollTo(target, { duration: 1.2 });
+        } else {
+          const topPos = typeof target === 'number' ? target : target.getBoundingClientRect().top + window.scrollY - 52;
+          window.scrollTo({ top: topPos, behavior: 'smooth' });
+        }
+      }
+    });
+  });
 });
 
 boot();
