@@ -815,6 +815,7 @@ document.addEventListener('DOMContentLoaded', () => {
       for (const chip of document.querySelectorAll('.chip')) chip.classList.toggle('is-on', chip === btn);
       renderStories();
     });
+  }
 });
 
 boot();
