@@ -327,28 +327,33 @@ async function serveStatic(res, pathname) {
   }
 }
 
-const server = createServer(async (req, res) => {
+export default async function handler(req, res) {
   try {
+    const host = req.headers.host || 'localhost';
     if (await api(req, res)) return;
-    await serveStatic(res, new URL(req.url ?? '/', `http://${req.headers.host}`).pathname);
+    await serveStatic(res, new URL(req.url ?? '/', `http://${host}`).pathname);
   } catch (err) {
     console.error(err);
     if (!res.headersSent) json(res, { error: 'internal error' }, 500);
     else res.end();
   }
-});
+}
 
-server.listen(config.port, () => {
-  const targets = getTargets();
-  console.log('');
-  console.log('  ╔══════════════════════════════════════════════════╗');
-  console.log('  ║   T H E   D A I L Y   B U G L E                   ║');
-  console.log('  ║   self-healing intel on the long tail of the web  ║');
-  console.log('  ╚══════════════════════════════════════════════════╝');
-  console.log('');
-  console.log(`  front page   http://localhost:${config.port}`);
-  console.log(`  mode         ${config.mode}${config.mode === 'fixture' ? '  (no credentials needed)' : ''}`);
-  console.log(`  targets      ${targets.length}`);
-  console.log(`  seeded       ${isSeeded() ? 'yes' : 'no — run `npm run seed`'}`);
-  console.log('');
-});
+const server = createServer(handler);
+
+if (!process.env.VERCEL) {
+  server.listen(config.port, () => {
+    const targets = getTargets();
+    console.log('');
+    console.log('  ╔══════════════════════════════════════════════════╗');
+    console.log('  ║   T H E   D A I L Y   B U G L E                   ║');
+    console.log('  ║   self-healing intel on the long tail of the web  ║');
+    console.log('  ╚══════════════════════════════════════════════════╝');
+    console.log('');
+    console.log(`  front page   http://localhost:${config.port}`);
+    console.log(`  mode         ${config.mode}${config.mode === 'fixture' ? '  (no credentials needed)' : ''}`);
+    console.log(`  targets      ${targets.length}`);
+    console.log(`  seeded       ${isSeeded() ? 'yes' : 'no — run `npm run seed`'}`);
+    console.log('');
+  });
+}
