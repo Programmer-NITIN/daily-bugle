@@ -2,12 +2,24 @@
 
 **Self-healing competitive intelligence for the long tail of the web.**
 
-Eight niche developer tools. Eight Bright Data Scraper Studio collectors, each generated
-from one sentence of plain English. A drift detector that catches the failure mode
-nobody alerts on. And an autonomous repair loop that calls `bdata scraper heal` with a
-brief it wrote itself — published as a living comic newspaper.
+[![Live Demo](https://img.shields.io/badge/Vercel-Live%20Demo-success?style=for-the-badge&logo=vercel)](https://dailybugle-scrapeverse.vercel.app/)
+[![Hackathon](https://img.shields.io/badge/WeMakeDevs-Scrape--Verse%202026-orange?style=for-the-badge)](https://www.wemakedevs.org/hackathons/scrape-verse)
+[![Scraper Studio](https://img.shields.io/badge/Bright%20Data-Scraper%20Studio-blue?style=for-the-badge)](https://brightdata.com/)
+[![Zero Dependencies](https://img.shields.io/badge/Dependencies-0%20Zero-brightgreen?style=for-the-badge)](#architecture)
 
-Built for **Into the Scrape-Verse** — WeMakeDevs × Bright Data, August 2026.
+> 🚀 **Live Production Deployment:** [https://dailybugle-scrapeverse.vercel.app/](https://dailybugle-scrapeverse.vercel.app/)
+
+Eight niche developer tools. Eight Bright Data Scraper Studio collectors, each generated from one sentence of plain English. A drift detector that catches the failure mode nobody alerts on. And an autonomous repair loop that calls `bdata scraper heal` with a brief it wrote itself — published as a living comic newspaper.
+
+Built for **[Into the Scrape-Verse Hackathon](https://www.wemakedevs.org/hackathons/scrape-verse)** — WeMakeDevs × Bright Data, August 2026.
+
+---
+
+### 🌟 Quick Links for Hackathon Evaluators
+- 🌐 **Live Web Application**: [https://dailybugle-scrapeverse.vercel.app/](https://dailybugle-scrapeverse.vercel.app/)
+- 🧪 **Interactive Healing Lab**: Select a collector, trigger a layout break, and watch the autonomous repair stream live in the browser!
+- 🕷 **Spider-Sense Scoring Engine**: Quantitative drift detection across 4 content signals (`lib/spider-sense.js`).
+- ⚡ **Zero Runtime Dependencies**: Clones instantly and runs everywhere with zero npm install breakages.
 
 ---
 
