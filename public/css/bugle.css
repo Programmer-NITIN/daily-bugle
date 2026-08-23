@@ -787,6 +787,38 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 /* ============================================================
    CANON TIMELINE
    ============================================================ */
+.canon__wrapper {
+  background: var(--paper-dark);
+  border: var(--border);
+  box-shadow: var(--shadow);
+  padding: 1.2rem;
+  position: relative;
+}
+.canon__scrollbox {
+  max-height: 460px;
+  overflow-y: auto;
+  padding-right: 0.8rem;
+  padding-top: 0.4rem;
+  padding-bottom: 0.4rem;
+  scrollbar-width: thin;
+  scrollbar-color: var(--red) var(--paper-dark);
+}
+.canon__scrollbox::-webkit-scrollbar {
+  width: 10px;
+}
+.canon__scrollbox::-webkit-scrollbar-track {
+  background: var(--paper-deep);
+  border: 2px solid var(--ink);
+}
+.canon__scrollbox::-webkit-scrollbar-thumb {
+  background: var(--red);
+  border: 2px solid var(--ink);
+  box-shadow: inset 1px 1px 0 rgba(255, 255, 255, 0.4);
+}
+.canon__scrollbox::-webkit-scrollbar-thumb:hover {
+  background: var(--red-dark);
+}
+
 .canon__list { list-style: none; display: flex; flex-direction: column; gap: 1.2rem; }
 .canon__item { position: relative; padding-left: 2rem; }
 .canon__item::before {
