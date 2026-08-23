@@ -1,5 +1,5 @@
 /**
- * @file Front-page client with GSAP, ScrollTrigger, Lenis smooth scroll, and self-healing stream logic.
+ * @file Front-page client with GSAP, ScrollTrigger, Lenis smooth scroll, physics hanging spider, scroll spider progress, and self-healing stream logic.
  */
 
 let state = /** @type {any} */ (null);
@@ -350,7 +350,7 @@ function setBusy(running, label = 'idle') {
 }
 
 /* ------------------------------------------------------------------
-   GSAP, ScrollTrigger & Lenis Motion Logic
+   GSAP, ScrollTrigger, Lenis Smooth Scroll & Spiders Motion Logic
    ------------------------------------------------------------------ */
 
 function initAnimations() {
@@ -358,10 +358,17 @@ function initAnimations() {
 
   gsap.registerPlugin(ScrollTrigger);
 
-  // 1. Lenis Smooth Scrolling
+  // 1. Lenis Smooth Scrolling (Optimized for zero lag)
   let lenis = null;
   if (typeof Lenis !== 'undefined') {
-    lenis = new Lenis({ duration: 1.2, easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)) });
+    lenis = new Lenis({
+      duration: 1.0,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      orientation: 'vertical',
+      smoothWheel: true,
+      wheelMultiplier: 1.0,
+      touchMultiplier: 1.5,
+    });
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(0);
@@ -393,7 +400,226 @@ function initAnimations() {
     scrollTrigger: { trigger: '#hero', start: 'top top', end: 'bottom top', scrub: true },
   });
 
-  // 3. Marquees Infinite Scroll Loop
+  // 3. Scroll Spider Progress (Spider riding thread on right margin)
+  (function initScrollSpider() {
+    const thread = $('#spiderThread');
+    const bug = $('#spiderBug');
+    if (!thread || !bug) return;
+
+    ScrollTrigger.create({
+      start: 0,
+      end: () => document.documentElement.scrollHeight - window.innerHeight,
+      onUpdate(self) {
+        const h = self.progress * (window.innerHeight - 90) + 50;
+        thread.style.height = `${h}px`;
+        bug.style.top = `${h}px`;
+        gsap.to(bug, {
+          rotation: gsap.utils.clamp(-26, 26, self.getVelocity() / 90),
+          duration: 0.3,
+          overwrite: 'auto',
+        });
+      },
+    });
+  })();
+
+  // 4. Hero Hanging Physics Spider Canvas
+  (function initPhysicsSpider() {
+    const canvas = /** @type {HTMLCanvasElement} */ ($('#heroCanvas'));
+    if (!canvas) return;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    let W = 0, H = 0;
+
+    function resize() {
+      W = canvas.offsetWidth;
+      H = canvas.offsetHeight;
+      canvas.width = W * dpr;
+      canvas.height = H * dpr;
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    const SEGMENTS = 20;
+    const ropeLen = () => H * 0.45;
+    const anchor = { x: W * 0.78, tx: W * 0.78 };
+    const pts = Array.from({ length: SEGMENTS }, (_, i) => ({
+      x: W * 0.78,
+      y: (ropeLen() / (SEGMENTS - 1)) * i,
+      px: W * 0.78 + (i ? Math.random() * 6 - 3 : 0),
+      py: (ropeLen() / (SEGMENTS - 1)) * i,
+    }));
+
+    const mouse = { x: W / 2, y: H / 2, inHero: false };
+    window.addEventListener('mousemove', (e) => {
+      const r = canvas.getBoundingClientRect();
+      mouse.x = e.clientX - r.left;
+      mouse.y = e.clientY - r.top;
+      mouse.inHero = e.clientY >= r.top && e.clientY <= r.bottom;
+    });
+
+    canvas.addEventListener('click', () => {
+      const tip = pts[SEGMENTS - 1];
+      tip.px = tip.x + (Math.random() * 120 - 60);
+      tip.py = tip.y + (Math.random() * 40 + 20);
+    });
+
+    let legPhase = 0;
+    let heroInView = true;
+    let rafRunning = true;
+
+    if ('IntersectionObserver' in window) {
+      new IntersectionObserver((entries) => {
+        heroInView = entries[0].isIntersecting;
+        if (heroInView && !rafRunning) {
+          rafRunning = true;
+          step();
+        }
+      }, { threshold: 0 }).observe(canvas);
+    }
+
+    function step() {
+      if (!heroInView) {
+        rafRunning = false;
+        return;
+      }
+
+      anchor.tx = mouse.inHero ? Math.max(W * 0.15, Math.min(W * 0.85, mouse.x)) : W * 0.78;
+      anchor.x += (anchor.tx - anchor.x) * 0.035;
+
+      const seg = ropeLen() / (SEGMENTS - 1);
+
+      for (let i = 1; i < SEGMENTS; i++) {
+        const p = pts[i];
+        const vx = (p.x - p.px) * 0.985;
+        const vy = (p.y - p.py) * 0.985;
+        p.px = p.x;
+        p.py = p.y;
+        p.x += vx;
+        p.y += vy + 0.55;
+      }
+
+      pts[0].x = anchor.x;
+      pts[0].y = 0;
+
+      for (let k = 0; k < 5; k++) {
+        for (let i = 0; i < SEGMENTS - 1; i++) {
+          const a = pts[i], b = pts[i + 1];
+          const dx = b.x - a.x, dy = b.y - a.y;
+          const d = Math.hypot(dx, dy) || 0.0001;
+          const diff = ((d - seg) / d) * 0.5;
+          const ox = dx * diff, oy = dy * diff;
+          if (i === 0) { b.x -= ox * 2; b.y -= oy * 2; }
+          else { a.x += ox; a.y += oy; b.x -= ox; b.y -= oy; }
+        }
+      }
+
+      draw();
+      requestAnimationFrame(step);
+    }
+
+    function draw() {
+      ctx.clearRect(0, 0, W, H);
+      const ink = '#131015';
+
+      // Thread line
+      ctx.beginPath();
+      ctx.moveTo(pts[0].x, pts[0].y);
+      for (let i = 1; i < SEGMENTS; i++) {
+        const prev = pts[i - 1], p = pts[i];
+        ctx.quadraticCurveTo(prev.x, prev.y, (prev.x + p.x) / 2, (prev.y + p.y) / 2);
+      }
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = 1.8;
+      ctx.stroke();
+
+      // Spider Body at tip
+      const tip = pts[SEGMENTS - 1];
+      const prev = pts[SEGMENTS - 2];
+      const ang = Math.atan2(tip.y - prev.y, tip.x - prev.x) - Math.PI / 2;
+      const speed = Math.hypot(tip.x - tip.px, tip.y - tip.py);
+      legPhase += 0.08 + speed * 0.03;
+
+      ctx.save();
+      ctx.translate(tip.x, tip.y);
+      ctx.rotate(ang + Math.PI);
+      const s = Math.min(W, H) / 18;
+
+      ctx.strokeStyle = ink;
+      ctx.lineWidth = s * 0.14;
+      ctx.lineCap = 'round';
+      for (let side = -1; side <= 1; side += 2) {
+        for (let i = 0; i < 4; i++) {
+          const wob = Math.sin(legPhase + i * 1.3 + (side > 0 ? 0.7 : 0)) * s * 0.09;
+          const hipX = side * s * 0.2;
+          const hipY = -s * 0.06 + i * s * 0.16;
+          const kneeX = side * s * 0.62;
+          const kneeY = hipY - s * 0.32 + i * s * 0.1 + wob;
+          const footX = side * s * 0.95;
+          const footY = hipY + s * 0.22 + i * s * 0.14 + wob * 1.6;
+          ctx.beginPath();
+          ctx.moveTo(hipX, hipY);
+          ctx.quadraticCurveTo(kneeX, kneeY, footX, footY);
+          ctx.stroke();
+        }
+      }
+
+      // Body & Head
+      ctx.fillStyle = ink;
+      ctx.beginPath();
+      ctx.ellipse(0, s * 0.32, s * 0.34, s * 0.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.beginPath();
+      ctx.arc(0, -s * 0.28, s * 0.24, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Eyes
+      ctx.fillStyle = '#e62429';
+      ctx.beginPath();
+      ctx.arc(-s * 0.1, -s * 0.36, s * 0.06, 0, Math.PI * 2);
+      ctx.arc(s * 0.1, -s * 0.36, s * 0.06, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.restore();
+    }
+
+    step();
+  })();
+
+  // 5. Web Splat on Click
+  (function initWebSplat() {
+    window.addEventListener('click', (e) => {
+      const target = /** @type {HTMLElement} */ (e.target);
+      if (target.closest('button, a, input, select, option')) return;
+
+      const splat = document.createElement('div');
+      splat.className = 'websplat';
+      splat.style.left = `${e.clientX}px`;
+      splat.style.top = `${e.clientY}px`;
+      splat.innerHTML = `
+        <svg viewBox="0 0 100 100" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round">
+          ${Array.from({ length: 8 }, (_, i) => {
+            const a = (i * Math.PI) / 4;
+            return `<line x1="50" y1="50" x2="${50 + Math.cos(a) * 46}" y2="${50 + Math.sin(a) * 46}"/>`;
+          }).join('')}
+          <polygon points="50,18 73,27 82,50 73,73 50,82 27,73 18,50 27,27" />
+          <polygon points="50,33 62,38 67,50 62,62 50,67 38,62 33,50 38,38" />
+        </svg>`;
+      document.body.appendChild(splat);
+      if (typeof gsap !== 'undefined') {
+        gsap.fromTo(splat,
+          { scale: 0, rotation: gsap.utils.random(-40, 40) },
+          { scale: 1, rotation: 0, duration: 0.35, ease: 'back.out(2.5)' });
+        gsap.to(splat, { opacity: 0, duration: 0.5, delay: 0.8, onComplete: () => splat.remove() });
+      } else {
+        setTimeout(() => splat.remove(), 1200);
+      }
+    });
+  })();
+
+  // 6. Marquees Infinite Scroll Loop
   function marquee(sel, dir) {
     const track = document.querySelector(sel + ' .marquee__track');
     if (!track) return;
@@ -413,7 +639,7 @@ function initAnimations() {
   marquee('#marquee1', 1);
   marquee('#marquee2', -1);
 
-  // 4. Pinned Origin Story Sequence
+  // 7. Pinned Origin Story Sequence
   (function initOrigin() {
     const scenes = gsap.utils.toArray('.origin__scene');
     const num = $('#originNum');
@@ -455,7 +681,7 @@ function initAnimations() {
     });
   })();
 
-  // 5. Manifesto Character Scrub Reveal
+  // 8. Manifesto Character Scrub Reveal
   (function initManifesto() {
     const el = $('#manifestoText');
     if (!el) return;
@@ -478,7 +704,7 @@ function initAnimations() {
       });
   })();
 
-  // 6. Section Entrance Animations
+  // 9. Section Entrance Animations
   gsap.utils.toArray('.panel, .section-head').forEach((el) => {
     gsap.from(el, {
       y: 40, opacity: 0, duration: 0.8, ease: 'power3.out',
@@ -486,7 +712,7 @@ function initAnimations() {
     });
   });
 
-  // 7. Adaptive Top Header
+  // 10. Adaptive Top Header
   (function initAdaptiveHeader() {
     const header = document.querySelector('.header');
     if (!header) return;

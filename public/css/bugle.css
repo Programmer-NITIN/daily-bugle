@@ -97,6 +97,42 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 }
 
 /* ============================================================
+   SCROLL SPIDER PROGRESS & WEB SPLAT
+   ============================================================ */
+.scrollspider {
+  position: fixed;
+  top: 0; right: 28px;
+  z-index: 9100;
+  width: 30px;
+  pointer-events: none;
+}
+.scrollspider__thread {
+  position: absolute;
+  top: 0; left: 50%;
+  width: 2px; height: 0;
+  background: var(--ink);
+  opacity: 0.7;
+}
+.scrollspider__bug {
+  position: absolute;
+  top: 0; left: 50%;
+  width: 30px; height: 30px;
+  transform: translate(-50%, -100%);
+  color: var(--red);
+  will-change: transform, top;
+}
+@media (max-width: 760px) { .scrollspider { display: none; } }
+
+.websplat {
+  position: fixed;
+  z-index: 9998;
+  pointer-events: none;
+  width: 90px; height: 90px;
+  transform: translate(-50%, -50%);
+  color: var(--ink);
+}
+
+/* ============================================================
    ADAPTIVE HEADER
    ============================================================ */
 .header {
@@ -105,13 +141,13 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
   padding: 0 clamp(1rem, 4vw, 3rem);
   display: flex; align-items: center; justify-content: space-between;
   z-index: 800;
-  background: rgba(242, 234, 215, 0.92);
-  backdrop-filter: blur(8px);
+  background: rgba(242, 234, 215, 0.94);
   border-bottom: 3px solid var(--ink);
   transition: background 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+  transform: translateZ(0);
 }
 .header.is-over-dark {
-  background: rgba(19, 16, 21, 0.95);
+  background: rgba(19, 16, 21, 0.96);
   color: var(--paper);
   border-bottom-color: var(--gold);
 }
@@ -173,17 +209,19 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 .hero__canvas {
   position: absolute; inset: 0;
   width: 100%; height: 100%;
-  pointer-events: none; z-index: 1;
+  z-index: 3; pointer-events: auto;
 }
 .hero__halftone {
   position: absolute; inset: 0;
   pointer-events: none; z-index: 2;
-  background-image: radial-gradient(circle, rgba(230,36,41,0.12) 1.5px, transparent 1.5px);
-  background-size: 14px 14px;
+  background-image: radial-gradient(circle, rgba(230,36,41,0.14) 1.5px, transparent 1.5px);
+  background-size: 16px 16px;
+  opacity: 0.6;
 }
 .hero__content {
   position: relative; z-index: 5;
   text-align: center; max-width: 1100px;
+  pointer-events: none;
 }
 .hero__kicker {
   font-family: var(--font-mono);
@@ -191,32 +229,35 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
   letter-spacing: 0.22em; text-transform: uppercase;
   font-weight: 700; color: var(--red-dark);
   margin-bottom: 0.6rem;
+  pointer-events: auto;
 }
 .hero__title {
   font-family: var(--font-display);
-  font-size: clamp(4rem, 18vw, 13.5rem);
-  line-height: 0.82; letter-spacing: -0.035em;
+  font-size: clamp(4.2rem, 16.5vw, 14.5rem);
+  line-height: 0.86; letter-spacing: 0.01em;
   text-transform: uppercase;
   margin: 0.2rem 0 1.2rem;
+  pointer-events: auto;
 }
 .hero__line { display: block; overflow: hidden; }
-.hero__word { display: inline-block; }
+.hero__word { display: inline-block; will-change: transform; }
 
-/* Text background clipping with image overlay */
+/* Polished Text background clipping matching reference portfolio */
 .hero__word--fill {
   color: transparent;
   background-image: url("/assets/comic-mono.jpg");
   background-size: cover;
-  background-position: 50% 20%;
+  background-position: 50% 30%;
   -webkit-background-clip: text;
   background-clip: text;
-  filter: drop-shadow(6px 6px 0 var(--ink));
+  -webkit-text-stroke: 2.5px var(--ink);
+  filter: drop-shadow(5px 5px 0 rgba(19, 16, 21, 0.45));
   will-change: background-position;
 }
 .hero__word--outline {
-  color: var(--paper);
-  -webkit-text-stroke: 4px var(--ink);
-  filter: drop-shadow(6px 6px 0 var(--red));
+  color: transparent;
+  -webkit-text-stroke: 3.5px var(--ink);
+  text-shadow: 10px 10px 0 var(--red);
 }
 
 .hero__sub {
