@@ -21,7 +21,7 @@ import { healTarget } from './lib/heal.js';
 import { createCommandFor } from './lib/brightdata.js';
 import { describeBreak } from './lib/fixtures.js';
 
-const PUBLIC_DIR = join(import.meta.dirname, 'public');
+const PUBLIC_DIR = join(process.cwd(), 'public');
 
 /** @type {Record<string, string>} */
 const MIME = {
