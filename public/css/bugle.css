@@ -653,6 +653,8 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 .console {
   font-family: var(--font-mono); font-size: 0.78rem;
   line-height: 1.55; height: 340px; overflow-y: auto;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
   padding: 0.8rem; background: #000; border: 2px solid #333;
   margin-top: 0.6rem; display: flex; flex-direction: column; gap: 0.15rem;
   scrollbar-width: thin;
@@ -798,6 +800,8 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
   max-height: 460px;
   overflow-y: auto;
   overflow-x: hidden;
+  overscroll-behavior: contain;
+  overscroll-behavior-y: contain;
   padding-left: 0.5rem;
   padding-right: 0.8rem;
   padding-top: 0.4rem;

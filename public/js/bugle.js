@@ -816,6 +816,13 @@ document.addEventListener('DOMContentLoaded', () => {
       renderStories();
     });
   }
+
+  // Prevent scroll chaining to window from inner containers
+  document.querySelectorAll('[data-lenis-prevent], .canon__scrollbox, .console').forEach((el) => {
+    el.addEventListener('wheel', (e) => {
+      e.stopPropagation();
+    }, { passive: true });
+  });
 });
 
 boot();
