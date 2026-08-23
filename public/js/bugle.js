@@ -353,8 +353,6 @@ function setBusy(running, label = 'idle') {
    GSAP, ScrollTrigger, Lenis Smooth Scroll & Spiders Motion Logic
    ------------------------------------------------------------------ */
 
-let globalLenis = null;
-
 function initAnimations() {
   if (typeof gsap === 'undefined') return;
 
@@ -369,10 +367,10 @@ function initAnimations() {
       touchMultiplier: 1.2,
       smoothTouch: false,
     });
+    window.lenisInstance = lenis;
     lenis.on('scroll', ScrollTrigger.update);
     gsap.ticker.add((time) => lenis.raf(time * 1000));
     gsap.ticker.lagSmoothing(500, 33);
-    globalLenis = lenis;
   }
 
   // 2. Hero Animations
@@ -819,43 +817,55 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Stark Mode Toggle & Scroll to Top
-  function toggleStarkMode() {
-    const isStark = document.body.classList.toggle('stark-mode');
-    const label = isStark ? '🕷 SPIDER MODE' : '⚡ STARK UPGRADE';
-    ['#btnStarkUpgrade', '#btnStarkHero'].forEach((sel) => {
-      const btn = $(sel);
-      if (btn) btn.textContent = label;
-    });
+  initStarkUpgrade();
+});
 
-    // Move to top of the page smoothly upon activation
-    if (globalLenis) {
-      globalLenis.scrollTo(0, { duration: 1.2 });
+function initStarkUpgrade() {
+  const btn = $('#btnStarkUpgrade');
+
+  function applyTheme(iron) {
+    document.body.classList.toggle('iron', iron);
+    if (btn) {
+      btn.innerHTML = iron ? '🕷 SPIDEY MODE' : '⚡ STARK UPGRADE';
+    }
+    try { localStorage.setItem('theme', iron ? 'iron' : 'spidey'); } catch (e) {}
+
+    // MOVE TO TOP IMMEDIATELY WHEN ACTIVATED / TOGGLED
+    if (window.lenisInstance) {
+      window.lenisInstance.scrollTo(0, { duration: 1.2 });
     } else {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
+
+    if (typeof gsap !== 'undefined') {
+      gsap.fromTo('.hero__title',
+        { scale: 0.95, filter: 'brightness(1.5)' },
+        { scale: 1, filter: 'brightness(1)', duration: 0.7, ease: 'elastic.out(1, 0.4)' }
+      );
+    }
   }
 
-  $('#btnStarkUpgrade')?.addEventListener('click', toggleStarkMode);
-  $('#btnStarkHero')?.addEventListener('click', toggleStarkMode);
-
-  // Smooth scroll for header anchor links
-  document.querySelectorAll('a[href^="#"]').forEach((a) => {
-    a.addEventListener('click', (e) => {
-      const href = a.getAttribute('href');
-      if (!href) return;
-      const target = href === '#hero' || href === '#top' ? 0 : document.querySelector(href);
-      if (target !== null) {
-        e.preventDefault();
-        if (globalLenis) {
-          globalLenis.scrollTo(target, { duration: 1.2 });
-        } else {
-          const topPos = typeof target === 'number' ? target : target.getBoundingClientRect().top + window.scrollY - 52;
-          window.scrollTo({ top: topPos, behavior: 'smooth' });
-        }
-      }
+  if (btn) {
+    btn.addEventListener('click', () => {
+      const isIron = document.body.classList.contains('iron');
+      applyTheme(!isIron);
     });
+  }
+
+  window.addEventListener('keydown', (e) => {
+    const k = e.key.toLowerCase();
+    if ((k !== '/' && k !== 'i') || e.metaKey || e.ctrlKey || e.altKey) return;
+    if (/input|textarea|select/i.test(document.activeElement?.tagName || '')) return;
+    e.preventDefault();
+    applyTheme(!document.body.classList.contains('iron'));
   });
-});
+
+  try {
+    if (localStorage.getItem('theme') === 'iron') {
+      document.body.classList.add('iron');
+      if (btn) btn.innerHTML = '🕷 SPIDEY MODE';
+    }
+  } catch (e) {}
+}
 
 boot();

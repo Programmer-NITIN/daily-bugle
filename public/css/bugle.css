@@ -775,80 +775,86 @@ code, .mono { font-family: var(--font-mono); font-size: 0.85em; }
 .colophon p { font-size: 0.85rem; line-height: 1.45; color: #444; }
 
 /* ============================================================
-   STARK MODE THEME OVERRIDES
+   STARK UPGRADE BUTTON & IRON MAN THEME OVERRIDES
    ============================================================ */
-.stark-btn {
+.header__stark-btn {
   font-family: var(--font-comic);
-  font-size: 1rem;
+  font-size: 0.92rem;
   letter-spacing: 0.08em;
-  background: var(--gold);
-  color: var(--ink);
+  color: var(--paper);
+  background: var(--red);
   border: 2px solid var(--ink);
-  padding: 0.35rem 0.85rem;
+  padding: 4px 12px;
+  border-radius: 4px;
+  box-shadow: 3px 3px 0 var(--gold);
   cursor: pointer;
-  box-shadow: 3px 3px 0 var(--ink);
-  transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
-  will-change: transform;
+  gap: 4px;
 }
-.stark-btn:hover {
-  background: var(--red);
-  color: var(--paper);
-  transform: translateY(-2px);
-  box-shadow: 5px 5px 0 var(--ink);
-}
-.stark-btn:active {
-  transform: translateY(1px);
-  box-shadow: 2px 2px 0 var(--ink);
-}
-
-body.stark-mode {
-  --red: #ff2424;
-  --red-dark: #b80000;
-  --paper: #0e0b12;
-  --paper-dark: #17131f;
-  --paper-deep: #211c2c;
-  --ink: #ffe6a7;
-  --gold: #ffbe0b;
-  color: #ffe6a7;
-  background: #09070d;
-}
-
-body.stark-mode .header {
-  background: rgba(23, 19, 31, 0.96);
-  color: var(--gold);
-  border-bottom-color: var(--red);
-}
-
-body.stark-mode .hero {
-  background: #09070d;
-}
-
-body.stark-mode .hero__word--fill {
-  -webkit-text-stroke: 2.5px var(--gold);
-  filter: drop-shadow(6px 6px 0 var(--red));
-}
-
-body.stark-mode .hero__word--outline {
-  -webkit-text-stroke: 3.5px var(--gold);
-  text-shadow: 10px 10px 0 var(--red);
-}
-
-body.stark-mode .card,
-body.stark-mode .story,
-body.stark-mode .canon__card,
-body.stark-mode .arch__node {
-  background: var(--paper-dark);
-  color: var(--ink);
-  border-color: var(--gold);
-  box-shadow: 5px 5px 0 var(--red);
-}
-
-body.stark-mode .stark-btn {
-  background: var(--red);
-  color: #ffffff;
-  border-color: var(--gold);
+.header__stark-btn:hover {
+  transform: translate(-1px, -1px);
   box-shadow: 4px 4px 0 var(--gold);
+  background: var(--red-dark);
 }
+
+body.iron {
+  --red: #e62429;
+  --red-dark: #b1121b;
+  --gold: #f2c14e;
+  --gold-glow: #ffe699;
+  --ink: #0d0b0e;
+  --paper: #16131a;
+  --paper-dark: #201a26;
+  --paper-deep: #2a2333;
+  background: var(--paper);
+  color: #f2ead7;
+}
+
+body.iron .header {
+  background: rgba(22, 19, 26, 0.96);
+  border-bottom-color: var(--gold);
+}
+body.iron .header__logo {
+  color: #f2ead7;
+}
+body.iron .header__logo-mark {
+  color: var(--gold);
+}
+body.iron .header__nav a {
+  color: #f2ead7;
+}
+body.iron .header__stark-btn {
+  background: var(--gold);
+  color: var(--ink);
+  border-color: var(--ink);
+  box-shadow: 3px 3px 0 var(--red);
+}
+body.iron .header__stark-btn:hover {
+  background: #ffe082;
+  box-shadow: 4px 4px 0 var(--red);
+}
+
+body.iron .hero__word--fill {
+  background-image: url("/assets/iron-armors.jpg");
+  -webkit-text-stroke: 2.5px var(--gold);
+  filter: drop-shadow(6px 6px 0 var(--red-dark));
+}
+body.iron .hero__word--outline {
+  -webkit-text-stroke: 3.5px var(--gold);
+  text-shadow: 10px 10px 0 var(--red-dark);
+}
+body.iron .panel {
+  background: var(--paper-dark);
+  border-color: var(--gold);
+  box-shadow: 8px 8px 0 var(--ink);
+  color: #f2ead7;
+}
+body.iron .card {
+  background: var(--paper-dark);
+  border-color: var(--gold);
+  box-shadow: 5px 5px 0 var(--ink);
+  color: #f2ead7;
+}
+
